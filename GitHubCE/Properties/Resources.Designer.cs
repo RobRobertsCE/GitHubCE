@@ -63,6 +63,26 @@ namespace GitHubCE.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _112_RefreshArrow_Green_32x32_72 {
+            get {
+                object obj = ResourceManager.GetObject("112_RefreshArrow_Green_32x32_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _305_Close_32x32_72 {
+            get {
+                object obj = ResourceManager.GetObject("305_Close_32x32_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ActivityReports {
             get {
                 object obj = ResourceManager.GetObject("ActivityReports", resourceCulture);

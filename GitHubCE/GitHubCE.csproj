@@ -79,6 +79,7 @@
     </Compile>
     <Compile Include="GitHubRepo.cs" />
     <Compile Include="JiraStatus.cs" />
+    <Compile Include="Logic\AutoProcessPullRequest.cs" />
     <Compile Include="PatchBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -121,6 +122,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Octocat.ico" />
+    <None Include="Resources\305_Close_32x32_72.png" />
+    <None Include="Resources\112_RefreshArrow_Green_32x32_72.png" />
     <None Include="Resources\ActivityReports.png" />
     <None Include="Resources\delete.png" />
     <None Include="Resources\settings_32.png" />

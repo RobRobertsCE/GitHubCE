@@ -112,7 +112,7 @@ namespace GitHubCE
         }
         public void GetRequests(ItemState? state, IList<string> repoNames)
         {
-             GetRequests(state, 0, repoNames);
+            GetRequests(state, 0, repoNames);
         }
         public void GetRequests(ItemState? state, int daysBack, IList<string> repoNames)
         {
@@ -124,7 +124,7 @@ namespace GitHubCE
         }
         #endregion
 
-        #region private [GitHub]               
+        #region private           
         async Task GetPullRequestViews(ItemState? state, DateRange searchDates, IList<string> repoNames)
         {
             try
@@ -138,111 +138,26 @@ namespace GitHubCE
 
                 foreach (var request in searchResults.Items)
                 {
-                    var existingRequest = PullRequests.FirstOrDefault(r => r.Id == request.Number);
-                    if (null == existingRequest)
+                    var repositoryName = request.PullRequest.HtmlUrl.Segments[2].TrimEnd('/');
+
+                    var pullRequest = PullRequests.FirstOrDefault(r => r.Id == request.Number);
+                    if (null == pullRequest)
                     {
-                        var newRequest = new PullRequestView()
-                        {
-                            RepoName = request.PullRequest.HtmlUrl.Segments[2].TrimEnd('/'),
-                            Title = request.Title,
-                            Id = request.Number,
-                            Created = request.CreatedAt,
-                            Updated = request.UpdatedAt.GetValueOrDefault(),
-                            State = request.State,
-                            Developer = request.User.Login,
-                            JiraIssues = GetJiraIssues(request), //TODO: Get Commits, Comments, etc?
-                            Tag = request
-                        };
-
+                        pullRequest = GetNewPullRequestView(request);
                         // Get detailed info on each Pull Request.
-                        var pullRequest = await Client.Repository.PullRequest.Get(_owner, newRequest.RepoName, request.Number);
-                        //Console.WriteLine("pullRequest.Base.Sha = {0}", pullRequest.Base.Sha);
-                        if (null != pullRequest)
-                        {
-                            newRequest.Branch = pullRequest.Base.Ref;
-                            newRequest.Version = BranchHelper.Map.GetVersion(newRequest.Branch);
-                            newRequest.Mergeable = pullRequest.Mergeable;
-                            newRequest.Merged = pullRequest.Merged;
-                            newRequest.ChangedFileCount = pullRequest.ChangedFiles;
-                            newRequest.State = pullRequest.State;
-                            newRequest.CommitCount = pullRequest.Commits;
-                            //if (newRequest.State != ItemState.Closed)
-                            //{
-                            // TODO: Handle Multiple Commits
+                        pullRequest = await GetPullRequestDetails(request, pullRequest);
 
-                            //Console.WriteLine("Getting Commit for pullRequest.Head.Sha = {0}", pullRequest.Head.Sha);
-                            //Console.WriteLine("                   pullRequest.Base.Sha = {0}", pullRequest.Base.Sha);
-                            var commitTask = await Client.Repository.Commit.Get(_owner, newRequest.RepoName, pullRequest.Head.Sha);
-                            //Console.WriteLine("Got Commit: commitTask.Sha = {0}", commitTask.Sha);
-
-                            if (null != commitTask)
-                            {
-                                newRequest.HasDbUpgrade = commitTask.Files.Any(f => f.Filename.Contains("AdvUpgrade"));
-                                newRequest.HasBuildScriptChange = commitTask.Files.Any(f => f.Filename.Contains("build.ps1"));
-                                newRequest.Files = commitTask.Files.Select(f => f.Filename).ToList();
-                                var patch = new PatchBuilder(newRequest);
-                                newRequest.AssembliesChanged = patch.Assemblies;
-                                newRequest.Commits.Add(commitTask);
-
-                                //if (commitTask.Parents.Count>0)
-                                //{
-                                //    Console.WriteLine("commitTask has {1} parents: commitTask.Sha = {0}", commitTask.Sha, commitTask.Parents.Count());
-
-                                //    foreach (var parent in commitTask.Parents)
-                                //    {
-                                //        Console.WriteLine("    parent.Sha = {0}", parent.Sha);
-                                //    }
-
-                                //    Console.WriteLine("Getting Commit for commitTask.Parents[0].Sha = {0}", commitTask.Parents[0].Sha);
-                                //    commitTask = await Client.Repository.Commit.Get(_owner, _reponame, commitTask.Parents[0].Sha);
-                                //    Console.WriteLine("Got Commit: commitTask.Sha = {0}", commitTask.Sha);
-                                //    Console.WriteLine("            pullRequest.Base.Sha = {0}", pullRequest.Base.Sha);
-                                //    if (commitTask.Sha == pullRequest.Base.Sha)
-                                //    {
-                                //        Console.WriteLine("Breaking...");
-                                //        Console.WriteLine();
-                                //        break;
-                                //    }
-                                //}
-                                //}
-                            }
-                        }
-                        else
-                        {
-                            // closed pull request
-                            newRequest.Branch = " - ";
-                            newRequest.Version = new Version(0, 0);
-                        }
-
-                        PullRequests.Add(newRequest);
-
-                        if (newRequest.State == ItemState.Open)
+                        PullRequests.Add(pullRequest);
+                        if (pullRequest.State == ItemState.Open)
                             hasNewRequests = true;
                     }
                     else // already had a copy in our list.. update it
                     {
                         existingRequestIds.Remove(request.Number);
-
-                        existingRequest.Updated = request.UpdatedAt.GetValueOrDefault();
-                        existingRequest.State = request.State;
-
-                        if (existingRequest.State == ItemState.Open)
+                        if (pullRequest.Updated != request.UpdatedAt.GetValueOrDefault())
                         {
-                            var pullRequest = await Client.Repository.PullRequest.Get(_owner, existingRequest.RepoName, request.Number);
-                            if (null != pullRequest)
-                            {
-                                existingRequest.Mergeable = request.PullRequest.Mergeable;
-                                existingRequest.Merged = request.PullRequest.Merged;
-                                existingRequest.ChangedFileCount = request.PullRequest.ChangedFiles;
-                                existingRequest.CommitCount = request.PullRequest.Commits;
-                                existingRequest.JiraIssues = GetJiraIssues(request);
-                                var commitTask = await Client.Repository.Commit.Get(_owner, existingRequest.RepoName, pullRequest.Head.Sha);
-                                existingRequest.HasBuildScriptChange = commitTask.Files.Any(f => f.Filename.Contains("build.ps1"));
-
-                            }
-                        }
-                        // update the JIRA status.
-                        existingRequest.JiraIssues = GetJiraIssues(request);
+                            pullRequest = await GetPullRequestDetails(request, pullRequest);
+                        }                       
                     }
                 }
 
@@ -261,7 +176,64 @@ namespace GitHubCE
                 ExceptionHandler(ex);
             }
         }
-        
+
+        PullRequestView GetNewPullRequestView(Octokit.Issue request)
+        {
+            var repositoryName = request.PullRequest.HtmlUrl.Segments[2].TrimEnd('/');
+            var newRequest = new PullRequestView()
+            {
+                RepoName = repositoryName,
+                Title = request.Title,
+                Id = request.Number,
+                Created = request.CreatedAt,
+                Updated = request.UpdatedAt.GetValueOrDefault(),
+                State = request.State,
+                Developer = request.User.Login,
+                JiraIssues = GetJiraIssues(request, repositoryName), //TODO: Get Commits, Comments, etc?
+                Tag = request
+            };
+
+            return newRequest;
+        }
+
+        async Task<PullRequestView> GetPullRequestDetails(Octokit.Issue request, PullRequestView pullRequest)
+        {
+            var pullRequestDetails =  await Client.Repository.PullRequest.Get(_owner, pullRequest.RepoName, pullRequest.Id);         
+
+            pullRequest.Branch = pullRequestDetails.Base.Ref;
+            pullRequest.Version = BranchHelper.Map.GetVersion(pullRequest.Branch);
+            pullRequest.Mergeable = pullRequestDetails.Mergeable;
+            pullRequest.Merged = pullRequestDetails.Merged;
+            pullRequest.ChangedFileCount = pullRequestDetails.ChangedFiles;
+            pullRequest.State = pullRequestDetails.State;
+            pullRequest.CommitCount = pullRequestDetails.Commits;
+            pullRequest.JiraIssues = GetJiraIssues(request, pullRequest.RepoName);
+            
+            pullRequest = await UpdateCommits(request, pullRequest, pullRequestDetails.Head.Sha);
+          
+            return pullRequest;
+        }
+
+        async Task<PullRequestView> UpdateCommits(Octokit.Issue request, PullRequestView pullRequest, string sha)
+        {
+            var commitTask = await Client.Repository.Commit.Get(_owner, pullRequest.RepoName, sha);
+
+            if (null != commitTask)
+            {
+                pullRequest.Commits.Add(commitTask);
+
+                pullRequest.HasDbUpgrade = commitTask.Files.Any(f => f.Filename.Contains("AdvUpgrade"));
+                pullRequest.HasBuildScriptChange = commitTask.Files.Any(f => f.Filename.Contains("build.ps1"));
+
+                pullRequest.Files = commitTask.Files.Select(f => f.Filename).ToList();
+
+                var patch = new PatchBuilder(pullRequest);
+                pullRequest.AssembliesChanged = patch.Assemblies;
+            }
+
+            return pullRequest;
+        }
+
         async Task<SearchIssuesResult> SearchPullRequests(ItemState? state, DateRange searchDates, IList<string> repoNames)
         {
             SearchIssuesRequest searchRequest = new SearchIssuesRequest()
@@ -279,21 +251,8 @@ namespace GitHubCE
 
             return await Client.Search.SearchIssues(searchRequest);
         }
-        #endregion
-
-        #region private [JIRA]
-        IssueStatus GetJiraStatus(string jiraIssueNumber)
-        {
-            var jiraIssue = JiraHelper.GetJiraIssue(jiraIssueNumber);
-            if (null != jiraIssue)
-            {
-                return jiraIssue.Status;
-            }
-            else
-                return null;
-        }
-
-        IList<Atlassian.Jira.Issue> GetJiraIssues(Octokit.Issue request)
+      
+        IList<Atlassian.Jira.Issue> GetJiraIssues(Octokit.Issue request, string repoName)
         {
             var jiraIssues = new List<Atlassian.Jira.Issue>();
             string titleAndBody = String.Empty;
@@ -313,7 +272,7 @@ namespace GitHubCE
             {
                 titleAndBody += request.Body;
             }
-            var jiraIssueNumbers = GetJiraIssueNumbers(titleAndBody);
+            var jiraIssueNumbers = GetJiraIssueNumbers(titleAndBody, repoName);
             foreach (var jiraIssueNumber in jiraIssueNumbers)
             {
                 var jiraIssue = JiraHelper.GetJiraIssue(jiraIssueNumber);
@@ -325,17 +284,20 @@ namespace GitHubCE
             return jiraIssues;
         }
 
-        IList<string> GetJiraIssueNumbers(string body)
+        IList<string> GetJiraIssueNumbers(string body, string repoName)
         {
             var issueNumbers = new List<string>();
-            var token = "ADVANTAGE";
-            var tokenLength = token.Length;
 
-            if (body.Contains(token))
+            var tokenLength = repoName.Length;
+
+            body = body.ToUpper();
+            repoName = repoName.ToUpper();
+
+            if (body.Contains(repoName))
             {
                 for (int i = 0; i < body.Length - tokenLength; i++)
                 {
-                    if (body.Substring(i, tokenLength) == token)
+                    if (body.Substring(i, tokenLength) == repoName)
                     {
                         var issueNumberBuffer = String.Empty;
                         var nextIdx = 0;

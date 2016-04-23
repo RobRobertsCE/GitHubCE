@@ -21,6 +21,8 @@ namespace GitHubCE
 {
     public partial class GitHubHelper : Form
     {
+        delegate void UpdateDisplayCallback(IList<PullRequestView> pullRequests);
+
         #region DllImports
         [DllImport("user32.dll")]
         static extern bool FlashWindow(IntPtr hwnd, bool bInvert);
@@ -33,6 +35,8 @@ namespace GitHubCE
         IList<string> _repoNames;
         bool _formLoading = true;
         ListViewColumnSorter lvwColumnSorter;
+        GitHubRepo _gitHubRepoHelper = null;
+        int _daysBack = 0;
         #endregion
 
         #region Properties
@@ -97,14 +101,15 @@ namespace GitHubCE
         private void GitHubHelper_Load(object sender, EventArgs e)
         {
             LoadOptions();
-           _formLoading = false;
+            _formLoading = false;
         }
         void LoadOptions()
         {
+            cboDaysBack.SelectedIndex = 0;
             showOpenRequestsToolStripMenuItem.Checked = Settings.Default.ShowOpenRequests;
             showClosedRequestsToolStripMenuItem.Checked = Settings.Default.ShowClosedRequests;
             LoadRepoNamesList();
-        }   
+        }
         #endregion
 
         #region Get Pull Requests
@@ -136,8 +141,7 @@ namespace GitHubCE
             lstFiles.Items.Clear();
             lstAssemblies.Items.Clear();
             txtCommitMessage.Clear();
-            lnkPullRequest.Text = "";
-            txtComments.Clear();
+            lnkPullRequest.Text = "";            
         }
 
         private void RequestSelected()
@@ -158,8 +162,19 @@ namespace GitHubCE
             }
         }
 
+        void SafeDisplayPullRequests(IList<PullRequestView> requests)
+        {
+            UpdateDisplayCallback cb = new UpdateDisplayCallback(DisplayPullRequests);
+            this.Invoke(cb, new object[] { requests });
+        }
         void DisplayPullRequests(IList<PullRequestView> requests)
         {
+            if (this.lvPullRequests.InvokeRequired)
+            {
+                UpdateDisplayCallback cb = new UpdateDisplayCallback(DisplayPullRequests);
+                this.Invoke(cb, new object[] { requests });
+            }
+
             foreach (var request in requests.OrderBy(r => r.Updated))
             {
                 if (request.State == ItemState.Open && Settings.Default.ShowOpenRequests || request.State != ItemState.Open && Settings.Default.ShowClosedRequests)
@@ -344,14 +359,14 @@ namespace GitHubCE
             //}
             //txtComments.AppendText(sb.ToString());
 
-            var pullRequestComments = await Client.PullRequest.Comment.GetAll(Settings.Default.GitHubRepoOwner, request.RepoName, requestNumber);
-            sb = new StringBuilder();
-            foreach (PullRequestReviewComment comment in pullRequestComments)
-            {
-                sb.AppendFormat("{0} {1}:\r\n{2}\r\n", comment.CreatedAt, comment.User.Login, comment.Body);
-                sb.AppendLine("--------------------------\r\n\r\n");
-            }
-            txtComments.AppendText(sb.ToString());
+            //var pullRequestComments = await Client.PullRequest.Comment.GetAll(Settings.Default.GitHubRepoOwner, request.RepoName, requestNumber);
+            //sb = new StringBuilder();
+            //foreach (PullRequestReviewComment comment in pullRequestComments)
+            //{
+            //    sb.AppendFormat("{0} {1}:\r\n{2}\r\n", comment.CreatedAt, comment.User.Login, comment.Body);
+            //    sb.AppendLine("--------------------------\r\n\r\n");
+            //}
+            //txtComments.AppendText(sb.ToString());
         }
         #endregion
 
@@ -448,6 +463,7 @@ namespace GitHubCE
                 {
                     timer1.Stop();
                     tsbTimer.Text = "Start Timer";
+                    tsbTimer.Image = Properties.Resources._112_RefreshArrow_Green_32x32_72;
                 }
                 else
                 {
@@ -466,7 +482,12 @@ namespace GitHubCE
 
                     timer1.Start();
                     tsbTimer.Text = "Stop Timer";
+                    tsbTimer.Image = Properties.Resources._305_Close_32x32_72;
                 }
+
+                tsbOpen.Enabled = !timer1.Enabled;
+                tsbClosed.Enabled = !timer1.Enabled;
+                tsbAll.Enabled = !timer1.Enabled;
             }
             catch (Exception ex)
             {
@@ -577,6 +598,18 @@ namespace GitHubCE
         }
         #endregion
 
+        #region context menu items
+        private void openJIRAIssueToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenJIRAIssue();
+        }
+
+        private void openPullRequestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenGitHubIssue();
+        }
+        #endregion
+
         #region Toolbar Button Items
         private void tsbTimer_Click(object sender, EventArgs e)
         {
@@ -593,27 +626,7 @@ namespace GitHubCE
         private void tsbAll_Click(object sender, EventArgs e)
         {
             GetAllRequests();
-        }
-        private void tsbJIRAIssue_Click(object sender, EventArgs e)
-        {
-            OpenJIRAIssue();
-        }
-        private void tsbGitHubIssue_Click(object sender, EventArgs e)
-        {
-            OpenGitHubIssue();
-        }
-        private void tsbAdvantage_Click(object sender, EventArgs e)
-        {
-            OpenAdvantageBoard();
-        }
-        private void tsbBamboo_Click(object sender, EventArgs e)
-        {
-            OpenBamboo();
-        }
-        private void tsbPullRequests_Click(object sender, EventArgs e)
-        {
-            OpenPullRequests();
-        }
+        }      
         private void tsbOpenBinFolder_Click(object sender, EventArgs e)
         {
             Process.Start(@"C:\Users\rroberts\Source\Repos\Advantage\bin");
@@ -625,12 +638,36 @@ namespace GitHubCE
         private void btnDevReportsFolder_Click(object sender, EventArgs e)
         {
             Process.Start(@"\\ceserver\Development\Development Reports");
-        }
-        private void btnClearGrid_Click(object sender, EventArgs e)
+        }            
+        private void tsbAdvantage_Click_1(object sender, EventArgs e)
         {
-            ClearRequests();
+            OpenAdvantageBoard();
+        }
+
+        private void tsbBamboo_Click_1(object sender, EventArgs e)
+        {
+            OpenBamboo();
+        }
+
+        private void tsbJIRAIssue_Click_1(object sender, EventArgs e)
+        {
+            OpenJIRAIssue();
+        }
+
+        private void tsbGitHubIssue_Click_1(object sender, EventArgs e)
+        {
+            OpenGitHubIssue();
+        }
+
+        private void tsbPullRequests_Click_1(object sender, EventArgs e)
+        {
+            OpenPullRequests();
         }
         private void tsbOptions_Click(object sender, EventArgs e)
+        {
+            DisplayOptionsDialog();
+        }
+        void DisplayOptionsDialog()
         {
             try
             {
@@ -653,6 +690,28 @@ namespace GitHubCE
         {
             this.Close();
         }
+
+        private void cboDaysBack_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (null == cboDaysBack.SelectedItem)
+            {
+                _daysBack = 0;
+            }
+            else
+            {
+                _daysBack = Convert.ToInt32(cboDaysBack.SelectedItem);
+            }
+        }
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisplayOptionsDialog();
+        }
+
+        private void btnClearGrid_Click(object sender, EventArgs e)
+        {
+            ClearRequests();
+        }
         #endregion
         #endregion
 
@@ -665,7 +724,6 @@ namespace GitHubCE
         private void SetFormStateIdle(DateTime lastUpdate)
         {
             lblLastUpdate.Text = String.Format("Last Update: {0}", lastUpdate.ToString());
-            lblAppStatus.Text = "";
         }
 
         #endregion
@@ -731,30 +789,29 @@ namespace GitHubCE
         }
         #endregion
 
-        #region GitHubRepo   
-        GitHubRepo _gitHubRepoHelper = null;
-        int _daysBack = 0;
-        private void RefreshRequests(ItemState? state)
+        #region GitHubRepo          
+        private async void RefreshRequests(ItemState? state)
         {
             try
             {
                 SetFormStateBusy();
-                if (null== _gitHubRepoHelper)
+                if (null == _gitHubRepoHelper)
                 {
                     _gitHubRepoHelper = new GitHubRepo(Settings.Default.GitHubRepoOwner, Settings.Default.GitHubUserName, Settings.Default.GitHubToken);//, repoName);
                     _gitHubRepoHelper.NewPullRequests += CustReports_NewPullRequests;
                     _gitHubRepoHelper.GetPullRequestsComplete += CustReports_GetPullRequestComplete;
                 }
-                lblAppStatus.Text = "Polling Repo...";
                 // start new thread here
-                _gitHubRepoHelper.GetRequests(state, _daysBack, _repoNames);              
+                await Task.Run(() =>
+                {
+                    _gitHubRepoHelper.GetRequests(state, _daysBack, _repoNames);
+                });
             }
             catch (Exception ex)
             {
                 ExceptionHandler(ex);
             }
         }
-     
         private void CustReports_NewPullRequests(object sender, EventArgs e)
         {
             try
@@ -771,8 +828,7 @@ namespace GitHubCE
             try
             {
                 GitHubRepo repo = (GitHubRepo)sender;
-                lblAppStatus.Text = "Updating Display...";
-                DisplayPullRequests(repo.PullRequests);
+                SafeDisplayPullRequests(repo.PullRequests);
                 SetFormStateIdle(DateTime.Now);
             }
             catch (Exception ex)
@@ -913,6 +969,6 @@ namespace GitHubCE
             }
 
         }
-        #endregion       
+        #endregion
     }
 }
