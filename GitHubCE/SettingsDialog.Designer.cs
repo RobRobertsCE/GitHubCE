@@ -45,6 +45,9 @@
             this.label6 = new System.Windows.Forms.Label();
             this.lstRepos = new System.Windows.Forms.CheckedListBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.btnRemoveRepo = new System.Windows.Forms.Button();
+            this.btnAddRepo = new System.Windows.Forms.Button();
+            this.txtAddRepo = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,7 +56,7 @@
             this.panel1.Controls.Add(this.btnCancel);
             this.panel1.Controls.Add(this.btnOK);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 389);
+            this.panel1.Location = new System.Drawing.Point(0, 421);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(510, 43);
             this.panel1.TabIndex = 0;
@@ -61,6 +64,7 @@
             // btnCancel
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(432, 3);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 37);
@@ -194,6 +198,7 @@
             this.lstRepos.Name = "lstRepos";
             this.lstRepos.Size = new System.Drawing.Size(355, 199);
             this.lstRepos.TabIndex = 13;
+            this.lstRepos.SelectedIndexChanged += new System.EventHandler(this.lstRepos_SelectedIndexChanged);
             // 
             // label7
             // 
@@ -205,11 +210,45 @@
             this.label7.TabIndex = 14;
             this.label7.Text = "Repo List:";
             // 
+            // btnRemoveRepo
+            // 
+            this.btnRemoveRepo.Enabled = false;
+            this.btnRemoveRepo.Location = new System.Drawing.Point(427, 383);
+            this.btnRemoveRepo.Name = "btnRemoveRepo";
+            this.btnRemoveRepo.Size = new System.Drawing.Size(70, 27);
+            this.btnRemoveRepo.TabIndex = 15;
+            this.btnRemoveRepo.Text = "Remove";
+            this.btnRemoveRepo.UseVisualStyleBackColor = true;
+            this.btnRemoveRepo.Click += new System.EventHandler(this.btnRemoveRepo_Click);
+            // 
+            // btnAddRepo
+            // 
+            this.btnAddRepo.Enabled = false;
+            this.btnAddRepo.Location = new System.Drawing.Point(351, 383);
+            this.btnAddRepo.Name = "btnAddRepo";
+            this.btnAddRepo.Size = new System.Drawing.Size(70, 27);
+            this.btnAddRepo.TabIndex = 16;
+            this.btnAddRepo.Text = "Add";
+            this.btnAddRepo.UseVisualStyleBackColor = true;
+            this.btnAddRepo.Click += new System.EventHandler(this.btnAddRepo_Click);
+            // 
+            // txtAddRepo
+            // 
+            this.txtAddRepo.Location = new System.Drawing.Point(142, 386);
+            this.txtAddRepo.Name = "txtAddRepo";
+            this.txtAddRepo.Size = new System.Drawing.Size(199, 20);
+            this.txtAddRepo.TabIndex = 17;
+            this.txtAddRepo.TextChanged += new System.EventHandler(this.txtAddRepo_TextChanged);
+            // 
             // SettingsDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(510, 432);
+            this.CancelButton = this.btnCancel;
+            this.ClientSize = new System.Drawing.Size(510, 464);
+            this.Controls.Add(this.txtAddRepo);
+            this.Controls.Add(this.btnAddRepo);
+            this.Controls.Add(this.btnRemoveRepo);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.lstRepos);
             this.Controls.Add(this.txtJiraPassword);
@@ -225,7 +264,9 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.panel1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "SettingsDialog";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.SettingsDialog_Load);
             this.panel1.ResumeLayout(false);
@@ -253,5 +294,8 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckedListBox lstRepos;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button btnRemoveRepo;
+        private System.Windows.Forms.Button btnAddRepo;
+        private System.Windows.Forms.TextBox txtAddRepo;
     }
 }

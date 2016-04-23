@@ -11,7 +11,7 @@ namespace GitHubCE
         public int Id { get; set; }
         public DateTimeOffset Created { get; set; }
         public DateTimeOffset Updated { get; set; }
-        public string Repo { get; set; }
+        public string RepoName { get; set; }
         public string Title { get; set; }
         public bool HasBuildScriptChange { get; set; }
         public string JiraIssueNumber {

@@ -42,8 +42,7 @@ namespace GitHubCE
         private readonly string _token;
         #endregion
 
-        #region properties
-        public string RepoName { get; set; }
+        #region properties        
         private GitHubClient _client = null;
         public GitHubClient Client
         {
@@ -55,21 +54,6 @@ namespace GitHubCE
                     _client.Credentials = new Credentials(_user, _token);
                 }
                 return _client;
-            }
-        }
-
-        private Repository _repository = null;
-        public Repository Repository
-        {
-            get
-            {
-                if (null == _repository)
-                {
-                    var task = Client.Repository.Get(_owner, RepoName);
-                    _repository = (Repository)task.AsyncState;
-                }
-
-                return _repository;
             }
         }
 
@@ -113,34 +97,41 @@ namespace GitHubCE
 
         }
 
-        public GitHubRepo(string owner, string user, string token, string repoName)
+        public GitHubRepo(string owner, string user, string token)
         {
             _owner = owner;
             _user = user;
             _token = token;
-            RepoName = repoName;
         }
         #endregion
 
         #region public   
-        public void GetRequests()
+        public void GetRequests(IList<string> repoNames)
         {
-            var result = GetPullRequestsFromRepo(null);
+            GetRequests(null, 0, repoNames);
         }
-        public void GetRequests(ItemState? state)
+        public void GetRequests(ItemState? state, IList<string> repoNames)
         {
-            var result = GetPullRequestsFromRepo(state);
+             GetRequests(state, 0, repoNames);
+        }
+        public void GetRequests(ItemState? state, int daysBack, IList<string> repoNames)
+        {
+            GetRequests(state, new DateRange(DateTime.Now.AddDays(-1 * daysBack), SearchQualifierOperator.GreaterThanOrEqualTo), repoNames);
+        }
+        public void GetRequests(ItemState? state, DateRange searchDates, IList<string> repoNames)
+        {
+            var result = GetPullRequestViews(state, searchDates, repoNames);
         }
         #endregion
 
-        #region private [GitHub]
-        async Task GetPullRequestsFromRepo(ItemState? state)
+        #region private [GitHub]               
+        async Task GetPullRequestViews(ItemState? state, DateRange searchDates, IList<string> repoNames)
         {
             try
             {
                 var hasNewRequests = false;
 
-                var searchResults = await SearchPullRequests(state);
+                var searchResults = await SearchPullRequests(state, searchDates, repoNames);
 
                 // Gets general info on each Pull Request.
                 var existingRequestIds = PullRequests.Select(r => r.Id).ToList();
@@ -152,7 +143,7 @@ namespace GitHubCE
                     {
                         var newRequest = new PullRequestView()
                         {
-                            Repo = RepoName,
+                            RepoName = request.PullRequest.HtmlUrl.Segments[2].TrimEnd('/'),
                             Title = request.Title,
                             Id = request.Number,
                             Created = request.CreatedAt,
@@ -164,7 +155,7 @@ namespace GitHubCE
                         };
 
                         // Get detailed info on each Pull Request.
-                        var pullRequest = await Client.Repository.PullRequest.Get(_owner, RepoName, request.Number);
+                        var pullRequest = await Client.Repository.PullRequest.Get(_owner, newRequest.RepoName, request.Number);
                         //Console.WriteLine("pullRequest.Base.Sha = {0}", pullRequest.Base.Sha);
                         if (null != pullRequest)
                         {
@@ -181,7 +172,7 @@ namespace GitHubCE
 
                             //Console.WriteLine("Getting Commit for pullRequest.Head.Sha = {0}", pullRequest.Head.Sha);
                             //Console.WriteLine("                   pullRequest.Base.Sha = {0}", pullRequest.Base.Sha);
-                            var commitTask = await Client.Repository.Commit.Get(_owner, RepoName, pullRequest.Head.Sha);
+                            var commitTask = await Client.Repository.Commit.Get(_owner, newRequest.RepoName, pullRequest.Head.Sha);
                             //Console.WriteLine("Got Commit: commitTask.Sha = {0}", commitTask.Sha);
 
                             if (null != commitTask)
@@ -234,9 +225,10 @@ namespace GitHubCE
 
                         existingRequest.Updated = request.UpdatedAt.GetValueOrDefault();
                         existingRequest.State = request.State;
+
                         if (existingRequest.State == ItemState.Open)
                         {
-                            var pullRequest = await Client.Repository.PullRequest.Get(_owner, RepoName, request.Number);
+                            var pullRequest = await Client.Repository.PullRequest.Get(_owner, existingRequest.RepoName, request.Number);
                             if (null != pullRequest)
                             {
                                 existingRequest.Mergeable = request.PullRequest.Mergeable;
@@ -244,7 +236,7 @@ namespace GitHubCE
                                 existingRequest.ChangedFileCount = request.PullRequest.ChangedFiles;
                                 existingRequest.CommitCount = request.PullRequest.Commits;
                                 existingRequest.JiraIssues = GetJiraIssues(request);
-                                var commitTask = await Client.Repository.Commit.Get(_owner, RepoName, pullRequest.Head.Sha);
+                                var commitTask = await Client.Repository.Commit.Get(_owner, existingRequest.RepoName, pullRequest.Head.Sha);
                                 existingRequest.HasBuildScriptChange = commitTask.Files.Any(f => f.Filename.Contains("build.ps1"));
 
                             }
@@ -269,23 +261,22 @@ namespace GitHubCE
                 ExceptionHandler(ex);
             }
         }
-        async Task<SearchIssuesResult> SearchPullRequests(ItemState? state)
+        
+        async Task<SearchIssuesResult> SearchPullRequests(ItemState? state, DateRange searchDates, IList<string> repoNames)
         {
-            return await SearchPullRequests(state, 0);
-        }
-        async Task<SearchIssuesResult> SearchPullRequests(ItemState? state, int daysBack)
-        {
-            var today = DateTime.Now.AddDays(-1 * daysBack);
-
             SearchIssuesRequest searchRequest = new SearchIssuesRequest()
             {
                 // only search pull requests
                 Type = IssueTypeQualifier.PR,
                 State = state,
-                // focus on pull requests updated today
-                Updated = new DateRange(today, SearchQualifierOperator.GreaterThanOrEqualTo)
+                Updated = searchDates
             };
-            searchRequest.Repos.Add(String.Format(@"{0}/{1}", _owner, RepoName));
+
+            foreach (var repoName in repoNames)
+            {
+                searchRequest.Repos.Add(String.Format(@"{0}/{1}", _owner, repoName));
+            }
+
             return await Client.Search.SearchIssues(searchRequest);
         }
         #endregion

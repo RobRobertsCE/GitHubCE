@@ -111,6 +111,13 @@ namespace GitHubCE
             _repoNames = JsonConvert.DeserializeObject<List<string>>(Settings.Default.RepoList);
             _activeRepoNames = JsonConvert.DeserializeObject<List<string>>(Settings.Default.ActiveRepoList);
 
+            LoadRepoList();            
+        }
+
+        void LoadRepoList()
+        {
+            lstRepos.Items.Clear();
+
             foreach (var repoName in _repoNames)
             {
                 var idx = lstRepos.Items.Add(repoName);
@@ -137,6 +144,32 @@ namespace GitHubCE
                 MessageBox.Show(this, ex.Message, "Exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        private void txtAddRepo_TextChanged(object sender, EventArgs e)
+        {
+            btnAddRepo.Enabled = (txtAddRepo.Text.Trim() != String.Empty);
+        }
+
+        private void lstRepos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnRemoveRepo.Enabled = (lstRepos.SelectedItems.Count>0);
+        }
+
+        private void btnAddRepo_Click(object sender, EventArgs e)
+        {
+            var repoToAdd = txtAddRepo.Text.Trim();
+            _repoNames.Add(repoToAdd);
+            _activeRepoNames.Add(repoToAdd);
+            LoadRepoList();
+        }
+
+        private void btnRemoveRepo_Click(object sender, EventArgs e)
+        {
+            var repoToRemove = lstRepos.SelectedItems[0].ToString();
+            _repoNames.Remove(repoToRemove);
+            _activeRepoNames.Remove(repoToRemove);
+            LoadRepoList();
         }
     }
 }

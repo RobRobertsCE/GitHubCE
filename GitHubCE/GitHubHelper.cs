@@ -178,7 +178,7 @@ namespace GitHubCE
                         // add a new item.
                         var lvi = new ListViewItem(new string[] {
                             request.Id.ToString(),
-                            request.Repo,
+                            request.RepoName,
                             request.Updated.ToString(),
                             request.Title,
                             request.JiraIssueNumber,
@@ -225,7 +225,7 @@ namespace GitHubCE
                         match.SubItems.Clear();
                         match.Text = request.Id.ToString();
                         match.SubItems.AddRange(new string[] {
-                        request.Repo,
+                        request.RepoName,
                         request.Updated.ToString(),
                         request.Title,
                         request.JiraIssueNumber,
@@ -274,7 +274,7 @@ namespace GitHubCE
                 //if (request.State == ItemState.Open && Settings.Default.ShowOpenRequests || request.State != ItemState.Open && Settings.Default.ShowClosedRequests)
                 //{
 
-                var updatedPullRequest = await Client.Repository.PullRequest.Get(Settings.Default.GitHubRepoOwner, requestView.Repo, request.Number);
+                var updatedPullRequest = await Client.Repository.PullRequest.Get(Settings.Default.GitHubRepoOwner, requestView.RepoName, request.Number);
                 if (null != updatedPullRequest)
                 {
                     if (null != updatedPullRequest.Head)
@@ -292,7 +292,7 @@ namespace GitHubCE
 
         async Task GetAndDisplayCommit(string commitReferenceSHA, int requestNumber, PullRequestView request)
         {
-            _commit = await Client.Repository.Commit.Get(Settings.Default.GitHubRepoOwner, request.Repo, commitReferenceSHA);
+            _commit = await Client.Repository.Commit.Get(Settings.Default.GitHubRepoOwner, request.RepoName, commitReferenceSHA);
 
             //*** MESSAGE ***//
 
@@ -344,7 +344,7 @@ namespace GitHubCE
             //}
             //txtComments.AppendText(sb.ToString());
 
-            var pullRequestComments = await Client.PullRequest.Comment.GetAll(Settings.Default.GitHubRepoOwner, request.Repo, requestNumber);
+            var pullRequestComments = await Client.PullRequest.Comment.GetAll(Settings.Default.GitHubRepoOwner, request.RepoName, requestNumber);
             sb = new StringBuilder();
             foreach (PullRequestReviewComment comment in pullRequestComments)
             {
@@ -496,7 +496,6 @@ namespace GitHubCE
         #endregion
 
         #region Control event handlers
-
         #region ListView Events
         private void lvPullRequests_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -733,40 +732,29 @@ namespace GitHubCE
         #endregion
 
         #region GitHubRepo   
+        GitHubRepo _gitHubRepoHelper = null;
+        int _daysBack = 0;
         private void RefreshRequests(ItemState? state)
         {
             try
             {
                 SetFormStateBusy();
-
-                foreach (string repoName in _repoNames)
+                if (null== _gitHubRepoHelper)
                 {
-                    lblAppStatus.Text = "Polling " + repoName;
-                    GetRepo(repoName).GetRequests(state);
+                    _gitHubRepoHelper = new GitHubRepo(Settings.Default.GitHubRepoOwner, Settings.Default.GitHubUserName, Settings.Default.GitHubToken);//, repoName);
+                    _gitHubRepoHelper.NewPullRequests += CustReports_NewPullRequests;
+                    _gitHubRepoHelper.GetPullRequestsComplete += CustReports_GetPullRequestComplete;
                 }
+                lblAppStatus.Text = "Polling Repo...";
+                // start new thread here
+                _gitHubRepoHelper.GetRequests(state, _daysBack, _repoNames);              
             }
             catch (Exception ex)
             {
                 ExceptionHandler(ex);
             }
         }
-        GitHubRepo GetRepo(string repoName)
-        {
-            GitHubRepo repo = null;
-            if (Repos.ContainsKey(repoName))
-            {
-                repo = Repos[repoName];
-            }
-            else
-            {
-
-                repo = new GitHubRepo(Settings.Default.GitHubRepoOwner, Settings.Default.GitHubUserName, Settings.Default.GitHubToken, repoName);
-                repo.NewPullRequests += CustReports_NewPullRequests;
-                repo.GetPullRequestsComplete += CustReports_GetPullRequestComplete;
-                Repos.Add(repoName, repo);
-            }
-            return repo;
-        }
+     
         private void CustReports_NewPullRequests(object sender, EventArgs e)
         {
             try
@@ -783,7 +771,7 @@ namespace GitHubCE
             try
             {
                 GitHubRepo repo = (GitHubRepo)sender;
-                lblAppStatus.Text = "Updating " + repo.RepoName;
+                lblAppStatus.Text = "Updating Display...";
                 DisplayPullRequests(repo.PullRequests);
                 SetFormStateIdle(DateTime.Now);
             }
@@ -925,7 +913,6 @@ namespace GitHubCE
             }
 
         }
-        #endregion
-       
+        #endregion       
     }
 }
