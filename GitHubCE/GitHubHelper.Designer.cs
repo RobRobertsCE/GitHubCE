@@ -48,6 +48,10 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.cancelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pnlTop = new System.Windows.Forms.Panel();
+            this.pnlAutoProcessSteps = new System.Windows.Forms.Panel();
+            this.txtAutoProcess = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.splitter1 = new System.Windows.Forms.Splitter();
             this.pnlMessages = new System.Windows.Forms.Panel();
             this.txtCommitMessage = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -55,6 +59,8 @@
             this.tabFiles = new System.Windows.Forms.TabControl();
             this.tpAssemblies = new System.Windows.Forms.TabPage();
             this.lstAssemblies = new System.Windows.Forms.ListBox();
+            this.tpFiles = new System.Windows.Forms.TabPage();
+            this.lstFiles = new System.Windows.Forms.ListBox();
             this.lnkPullRequest = new System.Windows.Forms.LinkLabel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsbTimer = new System.Windows.Forms.ToolStripButton();
@@ -65,6 +71,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.cboDaysBack = new System.Windows.Forms.ToolStripComboBox();
+            this.btnClearGrid = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbOpenBinFolder = new System.Windows.Forms.ToolStripButton();
             this.btnDevReportsFolder = new System.Windows.Forms.ToolStripButton();
@@ -90,6 +97,7 @@
             this.showClosedRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.patchHelperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsbAdvantage = new System.Windows.Forms.ToolStripButton();
@@ -99,19 +107,21 @@
             this.tsbGitHubIssue = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbPullRequests = new System.Windows.Forms.ToolStripButton();
-            this.btnClearGrid = new System.Windows.Forms.ToolStripButton();
-            this.tpFiles = new System.Windows.Forms.TabPage();
-            this.lstFiles = new System.Windows.Forms.ListBox();
-            this.splitter1 = new System.Windows.Forms.Splitter();
-            this.pnlAutoProcessSteps = new System.Windows.Forms.Panel();
-            this.label2 = new System.Windows.Forms.Label();
-            this.txtAutoProcess = new System.Windows.Forms.TextBox();
             this.splitter3 = new System.Windows.Forms.Splitter();
+            this.ctxSystemMessages = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.copyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.buildRepoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dllsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.executablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxListView.SuspendLayout();
             this.pnlTop.SuspendLayout();
+            this.pnlAutoProcessSteps.SuspendLayout();
             this.pnlMessages.SuspendLayout();
             this.tabFiles.SuspendLayout();
             this.tpAssemblies.SuspendLayout();
+            this.tpFiles.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.notifyContextMenu.SuspendLayout();
@@ -120,8 +130,7 @@
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
-            this.tpFiles.SuspendLayout();
-            this.pnlAutoProcessSteps.SuspendLayout();
+            this.ctxSystemMessages.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvPullRequests
@@ -255,6 +264,48 @@
             this.pnlTop.Size = new System.Drawing.Size(1305, 191);
             this.pnlTop.TabIndex = 3;
             // 
+            // pnlAutoProcessSteps
+            // 
+            this.pnlAutoProcessSteps.Controls.Add(this.txtAutoProcess);
+            this.pnlAutoProcessSteps.Controls.Add(this.label2);
+            this.pnlAutoProcessSteps.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlAutoProcessSteps.Location = new System.Drawing.Point(703, 18);
+            this.pnlAutoProcessSteps.Name = "pnlAutoProcessSteps";
+            this.pnlAutoProcessSteps.Size = new System.Drawing.Size(602, 173);
+            this.pnlAutoProcessSteps.TabIndex = 14;
+            // 
+            // txtAutoProcess
+            // 
+            this.txtAutoProcess.ContextMenuStrip = this.ctxSystemMessages;
+            this.txtAutoProcess.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtAutoProcess.Location = new System.Drawing.Point(0, 20);
+            this.txtAutoProcess.Multiline = true;
+            this.txtAutoProcess.Name = "txtAutoProcess";
+            this.txtAutoProcess.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtAutoProcess.Size = new System.Drawing.Size(602, 153);
+            this.txtAutoProcess.TabIndex = 5;
+            // 
+            // label2
+            // 
+            this.label2.BackColor = System.Drawing.Color.RoyalBlue;
+            this.label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.label2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label2.ForeColor = System.Drawing.Color.White;
+            this.label2.Location = new System.Drawing.Point(0, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(602, 20);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "System Messages";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(700, 18);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(3, 173);
+            this.splitter1.TabIndex = 13;
+            this.splitter1.TabStop = false;
+            // 
             // pnlMessages
             // 
             this.pnlMessages.Controls.Add(this.txtCommitMessage);
@@ -328,6 +379,26 @@
             this.lstAssemblies.Name = "lstAssemblies";
             this.lstAssemblies.Size = new System.Drawing.Size(353, 141);
             this.lstAssemblies.TabIndex = 7;
+            // 
+            // tpFiles
+            // 
+            this.tpFiles.Controls.Add(this.lstFiles);
+            this.tpFiles.Location = new System.Drawing.Point(4, 22);
+            this.tpFiles.Name = "tpFiles";
+            this.tpFiles.Padding = new System.Windows.Forms.Padding(3);
+            this.tpFiles.Size = new System.Drawing.Size(359, 147);
+            this.tpFiles.TabIndex = 2;
+            this.tpFiles.Text = "Files";
+            this.tpFiles.UseVisualStyleBackColor = true;
+            // 
+            // lstFiles
+            // 
+            this.lstFiles.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstFiles.FormattingEnabled = true;
+            this.lstFiles.Location = new System.Drawing.Point(3, 3);
+            this.lstFiles.Name = "lstFiles";
+            this.lstFiles.Size = new System.Drawing.Size(353, 141);
+            this.lstFiles.TabIndex = 10;
             // 
             // lnkPullRequest
             // 
@@ -437,6 +508,15 @@
             this.cboDaysBack.Name = "cboDaysBack";
             this.cboDaysBack.Size = new System.Drawing.Size(50, 23);
             this.cboDaysBack.SelectedIndexChanged += new System.EventHandler(this.cboDaysBack_SelectedIndexChanged);
+            // 
+            // btnClearGrid
+            // 
+            this.btnClearGrid.Image = global::GitHubCE.Properties.Resources.RefreshDocViewHS;
+            this.btnClearGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnClearGrid.Name = "btnClearGrid";
+            this.btnClearGrid.Size = new System.Drawing.Size(79, 22);
+            this.btnClearGrid.Text = "Clear Grid";
+            this.btnClearGrid.Click += new System.EventHandler(this.btnClearGrid_Click);
             // 
             // toolStripSeparator6
             // 
@@ -627,7 +707,9 @@
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.optionsToolStripMenuItem});
+            this.optionsToolStripMenuItem,
+            this.patchHelperToolStripMenuItem,
+            this.buildRepoToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -635,9 +717,16 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.optionsToolStripMenuItem.Text = "&Options";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
+            // 
+            // patchHelperToolStripMenuItem
+            // 
+            this.patchHelperToolStripMenuItem.Name = "patchHelperToolStripMenuItem";
+            this.patchHelperToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.patchHelperToolStripMenuItem.Text = "Patch Helper";
+            this.patchHelperToolStripMenuItem.Click += new System.EventHandler(this.patchHelperToolStripMenuItem_Click);
             // 
             // toolStripContainer1
             // 
@@ -737,76 +826,6 @@
             this.tsbPullRequests.Text = "Open Pull Requests";
             this.tsbPullRequests.Click += new System.EventHandler(this.tsbPullRequests_Click_1);
             // 
-            // btnClearGrid
-            // 
-            this.btnClearGrid.Image = global::GitHubCE.Properties.Resources.RefreshDocViewHS;
-            this.btnClearGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnClearGrid.Name = "btnClearGrid";
-            this.btnClearGrid.Size = new System.Drawing.Size(79, 22);
-            this.btnClearGrid.Text = "Clear Grid";
-            this.btnClearGrid.Click += new System.EventHandler(this.btnClearGrid_Click);
-            // 
-            // tpFiles
-            // 
-            this.tpFiles.Controls.Add(this.lstFiles);
-            this.tpFiles.Location = new System.Drawing.Point(4, 22);
-            this.tpFiles.Name = "tpFiles";
-            this.tpFiles.Padding = new System.Windows.Forms.Padding(3);
-            this.tpFiles.Size = new System.Drawing.Size(359, 147);
-            this.tpFiles.TabIndex = 2;
-            this.tpFiles.Text = "Files";
-            this.tpFiles.UseVisualStyleBackColor = true;
-            // 
-            // lstFiles
-            // 
-            this.lstFiles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lstFiles.FormattingEnabled = true;
-            this.lstFiles.Location = new System.Drawing.Point(3, 3);
-            this.lstFiles.Name = "lstFiles";
-            this.lstFiles.Size = new System.Drawing.Size(353, 141);
-            this.lstFiles.TabIndex = 10;
-            // 
-            // splitter1
-            // 
-            this.splitter1.Location = new System.Drawing.Point(700, 18);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 173);
-            this.splitter1.TabIndex = 13;
-            this.splitter1.TabStop = false;
-            // 
-            // pnlAutoProcessSteps
-            // 
-            this.pnlAutoProcessSteps.Controls.Add(this.txtAutoProcess);
-            this.pnlAutoProcessSteps.Controls.Add(this.label2);
-            this.pnlAutoProcessSteps.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlAutoProcessSteps.Location = new System.Drawing.Point(703, 18);
-            this.pnlAutoProcessSteps.Name = "pnlAutoProcessSteps";
-            this.pnlAutoProcessSteps.Size = new System.Drawing.Size(602, 173);
-            this.pnlAutoProcessSteps.TabIndex = 14;
-            // 
-            // label2
-            // 
-            this.label2.BackColor = System.Drawing.Color.RoyalBlue;
-            this.label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(0, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(602, 20);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "AutoProcess Steps";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // txtAutoProcess
-            // 
-            this.txtAutoProcess.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtAutoProcess.Location = new System.Drawing.Point(0, 20);
-            this.txtAutoProcess.Multiline = true;
-            this.txtAutoProcess.Name = "txtAutoProcess";
-            this.txtAutoProcess.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtAutoProcess.Size = new System.Drawing.Size(602, 153);
-            this.txtAutoProcess.TabIndex = 5;
-            // 
             // splitter3
             // 
             this.splitter3.Dock = System.Windows.Forms.DockStyle.Top;
@@ -815,6 +834,57 @@
             this.splitter3.Size = new System.Drawing.Size(1305, 3);
             this.splitter3.TabIndex = 9;
             this.splitter3.TabStop = false;
+            // 
+            // ctxSystemMessages
+            // 
+            this.ctxSystemMessages.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.copyAllToolStripMenuItem});
+            this.ctxSystemMessages.Name = "ctxSystemMessages";
+            this.ctxSystemMessages.Size = new System.Drawing.Size(156, 54);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.clearToolStripMenuItem.Text = "Clear Messages";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 6);
+            // 
+            // copyAllToolStripMenuItem
+            // 
+            this.copyAllToolStripMenuItem.Name = "copyAllToolStripMenuItem";
+            this.copyAllToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.copyAllToolStripMenuItem.Text = "Copy All";
+            this.copyAllToolStripMenuItem.Click += new System.EventHandler(this.copyAllToolStripMenuItem_Click);
+            // 
+            // buildRepoToolStripMenuItem
+            // 
+            this.buildRepoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dllsToolStripMenuItem,
+            this.executablesToolStripMenuItem});
+            this.buildRepoToolStripMenuItem.Name = "buildRepoToolStripMenuItem";
+            this.buildRepoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.buildRepoToolStripMenuItem.Text = "Build Repo";
+            // 
+            // dllsToolStripMenuItem
+            // 
+            this.dllsToolStripMenuItem.Name = "dllsToolStripMenuItem";
+            this.dllsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dllsToolStripMenuItem.Text = "Dll\'s";
+            this.dllsToolStripMenuItem.Click += new System.EventHandler(this.dllsToolStripMenuItem_Click);
+            // 
+            // executablesToolStripMenuItem
+            // 
+            this.executablesToolStripMenuItem.Name = "executablesToolStripMenuItem";
+            this.executablesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.executablesToolStripMenuItem.Text = "Executables";
+            this.executablesToolStripMenuItem.Click += new System.EventHandler(this.executablesToolStripMenuItem_Click);
             // 
             // GitHubHelper
             // 
@@ -833,10 +903,13 @@
             this.Load += new System.EventHandler(this.GitHubHelper_Load);
             this.ctxListView.ResumeLayout(false);
             this.pnlTop.ResumeLayout(false);
+            this.pnlAutoProcessSteps.ResumeLayout(false);
+            this.pnlAutoProcessSteps.PerformLayout();
             this.pnlMessages.ResumeLayout(false);
             this.pnlMessages.PerformLayout();
             this.tabFiles.ResumeLayout(false);
             this.tpAssemblies.ResumeLayout(false);
+            this.tpFiles.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
@@ -851,9 +924,7 @@
             this.toolStripContainer1.PerformLayout();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
-            this.tpFiles.ResumeLayout(false);
-            this.pnlAutoProcessSteps.ResumeLayout(false);
-            this.pnlAutoProcessSteps.PerformLayout();
+            this.ctxSystemMessages.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -937,6 +1008,14 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtAutoProcess;
         private System.Windows.Forms.Splitter splitter3;
+        private System.Windows.Forms.ToolStripMenuItem patchHelperToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip ctxSystemMessages;
+        private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem copyAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem buildRepoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dllsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem executablesToolStripMenuItem;
     }
 }
 

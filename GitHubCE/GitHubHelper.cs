@@ -9,13 +9,17 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Octokit;
 using JiraCE;
-using Atlassian.Jira;
 using DbVersionLibrary;
 using System.IO;
 using System.Diagnostics;
 using GitHubCE.Properties;
 using Newtonsoft.Json;
 using System.Collections;
+using GitHubCE.Advantage;
+using System.Management.Automation;
+using System.Collections.ObjectModel;
+using System.Threading;
+using System.Management.Automation.Runspaces;
 
 namespace GitHubCE
 {
@@ -141,7 +145,7 @@ namespace GitHubCE
             lstFiles.Items.Clear();
             lstAssemblies.Items.Clear();
             txtCommitMessage.Clear();
-            lnkPullRequest.Text = "";            
+            lnkPullRequest.Text = "";
         }
 
         private void RequestSelected()
@@ -330,9 +334,9 @@ namespace GitHubCE
 
             //*** ASSEMBLIES ***//
 
-            var patch = new PatchBuilder(request);
-            request.AssembliesChanged = patch.Assemblies;
-            foreach (var assemblyName in patch.Assemblies)
+            var advantagePatchBuilder = new PullRequestAssembyHelper(request, "rroberts");
+            request.AssembliesChanged = advantagePatchBuilder.AssemblyFiles;
+            foreach (var assemblyName in request.AssembliesChanged)
             {
                 lstAssemblies.Items.Add(assemblyName);
             }
@@ -626,7 +630,7 @@ namespace GitHubCE
         private void tsbAll_Click(object sender, EventArgs e)
         {
             GetAllRequests();
-        }      
+        }
         private void tsbOpenBinFolder_Click(object sender, EventArgs e)
         {
             Process.Start(@"C:\Users\rroberts\Source\Repos\Advantage\bin");
@@ -638,7 +642,7 @@ namespace GitHubCE
         private void btnDevReportsFolder_Click(object sender, EventArgs e)
         {
             Process.Start(@"\\ceserver\Development\Development Reports");
-        }            
+        }
         private void tsbAdvantage_Click_1(object sender, EventArgs e)
         {
             OpenAdvantageBoard();
@@ -970,5 +974,171 @@ namespace GitHubCE
 
         }
         #endregion
+
+        private void patchHelperToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (lvPullRequests.SelectedItems.Count > 0)
+                {
+                    PullRequestView request = (PullRequestView)lvPullRequests.SelectedItems[0].Tag;
+                    var assemblyHelper = new PullRequestAssembyHelper(request, "rroberts");
+                    var targetVersion = request.Version;
+                    var patchHelper = new PatchHelper(assemblyHelper, targetVersion);
+                    var validationResults = patchHelper.ValidatePatchProcess();
+
+                    StringBuilder sb = new StringBuilder();
+                    if (validationResults.IsValid)
+                        sb.AppendLine("Validation Passed");
+                    else
+                    {
+                        sb.AppendLine("***** Validation Failed *****");
+                        foreach (var message in validationResults.Errors)
+                            sb.AppendLine(message);
+                    }
+
+                    if (validationResults.HasDebugMessages)
+                    {
+                        sb.AppendLine("***** DEBUG *****");
+                        foreach (var message in validationResults.DebugMessages)
+                        {
+                            sb.AppendLine(message);
+                        }
+                    }
+                    var validationReport = sb.ToString();
+                    Console.WriteLine(validationReport);
+                    txtAutoProcess.Text += validationReport + Environment.NewLine;
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            txtAutoProcess.Clear();
+        }
+
+        private void copyAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            txtAutoProcess.SelectAll();
+            txtAutoProcess.Copy();
+        }
+
+        private void dllsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BuildDlls();
+        }
+        void BuildDlls()
+        {
+            try
+            {
+                using (PowerShell PowerShellInstance = PowerShell.Create())
+                {
+                    // use "AddScript" to add the contents of a script file to the end of the execution pipeline.
+                    // use "AddCommand" to add individual commands/cmdlets to the end of the execution pipeline.
+                    //PowerShellInstance.AddScript("param($param1) $d = get-date; $s = 'test string value'; " +
+                    //        "$d; $s; $param1; get-service");
+
+                    string buildScript = @"C:\Users\rroberts\Source\Repos\Advantage\tools\build\build.ps1";
+
+                    PowerShellInstance.AddCommand(buildScript);
+
+                    // invoke execution on the pipeline (collecting output)
+                    Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
+
+                    powershellStringBuilder = new StringBuilder();
+                    // loop through each output object item
+                    foreach (PSObject outputItem in PSOutput)
+                    {
+                        // if null object was dumped to the pipeline during the script then a null
+                        // object may be present here. check for null to prevent potential NRE.
+                        if (outputItem != null)
+                        {
+                            //TODO: do something with the output item 
+                            // outputItem.BaseOBject
+                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
+                        }
+                    }
+                    var scriptOutput = powershellStringBuilder.ToString();
+
+                    Console.WriteLine(scriptOutput);
+                    txtAutoProcess.Text += scriptOutput;
+
+                    if (scriptOutput.Contains("error"))
+                    {
+                        NotifyError();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+
+            Console.WriteLine("Done");
+        }
+        private void executablesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BuildExecutables();
+        }
+        StringBuilder powershellStringBuilder = null;
+        void BuildExecutables()
+        {
+            try
+            {
+                using (PowerShell PowerShellInstance = PowerShell.Create())
+                {
+                    // use "AddScript" to add the contents of a script file to the end of the execution pipeline.
+                    // use "AddCommand" to add individual commands/cmdlets to the end of the execution pipeline.
+                    //PowerShellInstance.AddScript("param($param1) $d = get-date; $s = 'test string value'; " +
+                    //        "$d; $s; $param1; get-service");
+
+                    string buildScript = @"C:\Users\rroberts\Source\Repos\Advantage\tools\build\build.ps1";
+
+                    PowerShellInstance.AddCommand(buildScript);
+                    PowerShellInstance.AddParameter("Target", "Executables");
+
+                    // invoke execution on the pipeline (collecting output)
+                    Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
+
+                    powershellStringBuilder = new StringBuilder();
+                    // loop through each output object item
+                    foreach (PSObject outputItem in PSOutput)
+                    {
+                        // if null object was dumped to the pipeline during the script then a null
+                        // object may be present here. check for null to prevent potential NRE.
+                        if (outputItem != null)
+                        {
+                            //TODO: do something with the output item 
+                            // outputItem.BaseOBject
+                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
+                        }
+                    }
+                    var scriptOutput = powershellStringBuilder.ToString();
+
+                    Console.WriteLine(scriptOutput);
+                    txtAutoProcess.Text += scriptOutput;
+
+                    if (scriptOutput.Contains("error"))
+                    {
+                        NotifyError();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+
+            Console.WriteLine("Done");
+        }
+        void NotifyError()
+        {
+            MessageBox.Show("Error running build script");
+        }
+  
     }
 }

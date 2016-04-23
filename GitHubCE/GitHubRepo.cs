@@ -1,5 +1,6 @@
 ﻿using Atlassian.Jira;
 using DbVersionLibrary;
+using GitHubCE.Advantage;
 using GitHubCE.Properties;
 using JiraCE;
 using Octokit;
@@ -227,8 +228,8 @@ namespace GitHubCE
 
                 pullRequest.Files = commitTask.Files.Select(f => f.Filename).ToList();
 
-                var patch = new PatchBuilder(pullRequest);
-                pullRequest.AssembliesChanged = patch.Assemblies;
+                var advantagePatchBuilder = new PullRequestAssembyHelper(pullRequest, "rroberts");
+                pullRequest.AssembliesChanged = advantagePatchBuilder.AssemblyFiles;
             }
 
             return pullRequest;
