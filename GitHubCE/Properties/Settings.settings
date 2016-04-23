@@ -1,0 +1,61 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="GitHubCE.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="GitHubToken" Type="System.String" Scope="User">
+      <Value Profile="(Default)">6fe51e45b345263511071843b317d4ed3089b3ec</Value>
+    </Setting>
+    <Setting Name="GitHubUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">RobRobertsCE</Value>
+    </Setting>
+    <Setting Name="GitHubRepoOwner" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CenterEdge</Value>
+    </Setting>
+    <Setting Name="JiraUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://centeredge.atlassian.net</Value>
+    </Setting>
+    <Setting Name="JiraUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">rroberts</Value>
+    </Setting>
+    <Setting Name="JiraUserPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">hel-j205</Value>
+    </Setting>
+    <Setting Name="RepoList" Type="System.String" Scope="User">
+      <Value Profile="(Default)">["Advantage",
+"AdvantageCustomReports",
+"AdvantageWeb",
+"AdvantageCreditCards",
+"AdvantageShared",
+"AdvantageDiscountBase",
+"AdvantageRelay",
+"AdvantageWebAdmin",
+"AdvantageSales",
+"AdvantageTaxes",
+"CenterEdgeSiteInfo",
+"AdvantageWebAdmin",
+"advantageweb",
+"CECloud.Webstores",
+"CECloud.RevNu",
+"CECloud.Script",
+"CenterEdgeHelp",
+"advantagecorp",
+"CECloud.NodeJSRouter",
+"CECloud.Authentication",
+"CECloud.Clients",
+"CECloud.DataLayer",
+"CE.Log",
+"CenterEdgeUpgrades",
+"CECloud.MVC",
+"WPFMediaKit"]</Value>
+    </Setting>
+    <Setting Name="ActiveRepoList" Type="System.String" Scope="User">
+      <Value Profile="(Default)">["Advantage","AdvantageCustomReports","AdvantageWeb","AdvantageCreditCards","AdvantageShared","AdvantageDiscountBase","AdvantageRelay","AdvantageWebAdmin","AdvantageSales","AdvantageTaxes", "CenterEdgeSiteInfo"]</Value>
+    </Setting>
+    <Setting Name="ShowOpenRequests" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ShowClosedRequests" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
