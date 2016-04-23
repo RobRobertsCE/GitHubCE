@@ -15,6 +15,7 @@ using System.IO;
 using System.Diagnostics;
 using GitHubCE.Properties;
 using Newtonsoft.Json;
+using System.Collections;
 
 namespace GitHubCE
 {
@@ -30,6 +31,8 @@ namespace GitHubCE
         GitHubCommit _commit = null;
         Dictionary<string, GitHubRepo> Repos = new Dictionary<string, GitHubRepo>();
         IList<string> _repoNames;
+        bool _formLoading = true;
+        ListViewColumnSorter lvwColumnSorter;
         #endregion
 
         #region Properties
@@ -85,11 +88,23 @@ namespace GitHubCE
         public GitHubHelper()
         {
             InitializeComponent();
+
+            // Create an instance of a ListView column sorter and assign it 
+            // to the ListView control.
+            lvwColumnSorter = new ListViewColumnSorter();
+            this.lvPullRequests.ListViewItemSorter = lvwColumnSorter;
         }
         private void GitHubHelper_Load(object sender, EventArgs e)
         {
-            LoadRepoNamesList();
+            LoadOptions();
+           _formLoading = false;
         }
+        void LoadOptions()
+        {
+            showOpenRequestsToolStripMenuItem.Checked = Settings.Default.ShowOpenRequests;
+            showClosedRequestsToolStripMenuItem.Checked = Settings.Default.ShowClosedRequests;
+            LoadRepoNamesList();
+        }   
         #endregion
 
         #region Get Pull Requests
@@ -124,6 +139,7 @@ namespace GitHubCE
             lnkPullRequest.Text = "";
             txtComments.Clear();
         }
+
         private void RequestSelected()
         {
             try
@@ -161,17 +177,17 @@ namespace GitHubCE
                     {
                         // add a new item.
                         var lvi = new ListViewItem(new string[] {
-                    request.Id.ToString(),
-                    request.Repo,
-                    request.Updated.ToString(),
-                    request.Title,
-                    request.JiraIssueNumber,
-                    request.Branch,
-                    request.Version.ToString(),
-                    request.HasDbUpgrade ? "** YES **":"",
-                    request.State.ToString(),
-                    request.Developer,
-                    request.JiraIssueStatus});
+                            request.Id.ToString(),
+                            request.Repo,
+                            request.Updated.ToString(),
+                            request.Title,
+                            request.JiraIssueNumber,
+                            request.Branch,
+                            request.Version.ToString(),
+                            request.HasDbUpgrade ? "** YES **":"",
+                            request.State.ToString(),
+                            request.Developer,
+                            request.JiraIssueStatus});
 
                         lvi.UseItemStyleForSubItems = true;
 
@@ -490,6 +506,31 @@ namespace GitHubCE
         {
             lvPullRequests.BackColor = Color.Linen;
         }
+        private void lvPullRequests_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            // Determine if clicked column is already the column that is being sorted.
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            this.lvPullRequests.Sort();
+        }
         #endregion
 
         #region Timer
@@ -757,6 +798,8 @@ namespace GitHubCE
         #region menu items
         private void showOpenRequestsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
+            if (_formLoading) return;
+
             Settings.Default.ShowOpenRequests = showOpenRequestsToolStripMenuItem.Checked;
             Settings.Default.Save();
             ClearRequests();
@@ -766,6 +809,8 @@ namespace GitHubCE
 
         private void showClosedRequestsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
+            if (_formLoading) return;
+
             Settings.Default.ShowClosedRequests = showClosedRequestsToolStripMenuItem.Checked;
             Settings.Default.Save();
             ClearRequests();
@@ -779,6 +824,108 @@ namespace GitHubCE
         }
         #endregion
 
+        #region helper classes 
+        /// <summary>
+        /// This class is an implementation of the 'IComparer' interface.
+        /// </summary>
+        public class ListViewColumnSorter : IComparer
+        {
+            /// <summary>
+            /// Specifies the column to be sorted
+            /// </summary>
+            private int ColumnToSort;
+            /// <summary>
+            /// Specifies the order in which to sort (i.e. 'Ascending').
+            /// </summary>
+            private SortOrder OrderOfSort;
+            /// <summary>
+            /// Case insensitive comparer object
+            /// </summary>
+            private CaseInsensitiveComparer ObjectCompare;
 
+            /// <summary>
+            /// Class constructor.  Initializes various elements
+            /// </summary>
+            public ListViewColumnSorter()
+            {
+                // Initialize the column to '0'
+                ColumnToSort = 0;
+
+                // Initialize the sort order to 'none'
+                OrderOfSort = SortOrder.None;
+
+                // Initialize the CaseInsensitiveComparer object
+                ObjectCompare = new CaseInsensitiveComparer();
+            }
+
+            /// <summary>
+            /// This method is inherited from the IComparer interface.  It compares the two objects passed using a case insensitive comparison.
+            /// </summary>
+            /// <param name="x">First object to be compared</param>
+            /// <param name="y">Second object to be compared</param>
+            /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
+            public int Compare(object x, object y)
+            {
+                int compareResult;
+                ListViewItem listviewX, listviewY;
+
+                // Cast the objects to be compared to ListViewItem objects
+                listviewX = (ListViewItem)x;
+                listviewY = (ListViewItem)y;
+
+                // Compare the two items
+                compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+
+                // Calculate correct return value based on object comparison
+                if (OrderOfSort == SortOrder.Ascending)
+                {
+                    // Ascending sort is selected, return normal result of compare operation
+                    return compareResult;
+                }
+                else if (OrderOfSort == SortOrder.Descending)
+                {
+                    // Descending sort is selected, return negative result of compare operation
+                    return (-compareResult);
+                }
+                else
+                {
+                    // Return '0' to indicate they are equal
+                    return 0;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
+            /// </summary>
+            public int SortColumn
+            {
+                set
+                {
+                    ColumnToSort = value;
+                }
+                get
+                {
+                    return ColumnToSort;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
+            /// </summary>
+            public SortOrder Order
+            {
+                set
+                {
+                    OrderOfSort = value;
+                }
+                get
+                {
+                    return OrderOfSort;
+                }
+            }
+
+        }
+        #endregion
+       
     }
 }

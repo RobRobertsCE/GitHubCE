@@ -83,6 +83,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblLastUpdate = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblAppStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblWarning = new System.Windows.Forms.ToolStripStatusLabel();
             this.notNewRequest = new System.Windows.Forms.NotifyIcon(this.components);
             this.notifyContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmShow = new System.Windows.Forms.ToolStripMenuItem();
@@ -97,7 +98,6 @@
             this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showOpenRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showClosedRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lblWarning = new System.Windows.Forms.ToolStripStatusLabel();
             this.pnlTop.SuspendLayout();
             this.pnlMessagesAndComments.SuspendLayout();
             this.pnlComments.SuspendLayout();
@@ -135,6 +135,7 @@
             this.lvPullRequests.TabIndex = 2;
             this.lvPullRequests.UseCompatibleStateImageBehavior = false;
             this.lvPullRequests.View = System.Windows.Forms.View.Details;
+            this.lvPullRequests.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lvPullRequests_ColumnClick);
             this.lvPullRequests.SelectedIndexChanged += new System.EventHandler(this.lvPullRequests_SelectedIndexChanged);
             this.lvPullRequests.DoubleClick += new System.EventHandler(this.lvPullRequests_DoubleClick);
             // 
@@ -593,6 +594,15 @@
             this.lblAppStatus.Size = new System.Drawing.Size(12, 17);
             this.lblAppStatus.Text = "-";
             // 
+            // lblWarning
+            // 
+            this.lblWarning.AutoSize = false;
+            this.lblWarning.BackColor = System.Drawing.SystemColors.Control;
+            this.lblWarning.ForeColor = System.Drawing.Color.White;
+            this.lblWarning.Name = "lblWarning";
+            this.lblWarning.Size = new System.Drawing.Size(1078, 17);
+            this.lblWarning.Spring = true;
+            // 
             // notNewRequest
             // 
             this.notNewRequest.BalloonTipText = "New Pull Request";
@@ -705,15 +715,6 @@
             this.showClosedRequestsToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.showClosedRequestsToolStripMenuItem.Text = "Show Closed Requests";
             this.showClosedRequestsToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showClosedRequestsToolStripMenuItem_CheckedChanged);
-            // 
-            // lblWarning
-            // 
-            this.lblWarning.AutoSize = false;
-            this.lblWarning.BackColor = System.Drawing.SystemColors.Control;
-            this.lblWarning.ForeColor = System.Drawing.Color.White;
-            this.lblWarning.Name = "lblWarning";
-            this.lblWarning.Size = new System.Drawing.Size(1047, 17);
-            this.lblWarning.Spring = true;
             // 
             // GitHubHelper
             // 
