@@ -63,6 +63,26 @@ namespace GitHubCE.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _005_Task_32x42_72 {
+            get {
+                object obj = ResourceManager.GetObject("005_Task_32x42_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _112_RefreshArrow_Blue_32x42_72 {
+            get {
+                object obj = ResourceManager.GetObject("112_RefreshArrow_Blue_32x42_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _112_RefreshArrow_Green_32x32_72 {
             get {
                 object obj = ResourceManager.GetObject("112_RefreshArrow_Green_32x32_72", resourceCulture);
@@ -111,6 +131,26 @@ namespace GitHubCE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap FolderOpen_32x32_72 {
+            get {
+                object obj = ResourceManager.GetObject("FolderOpen_32x32_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Generic_Document {
+            get {
+                object obj = ResourceManager.GetObject("Generic_Document", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 6fe51e45b345263511071843b317d4ed3089b3ec.
         /// </summary>
         internal static string GitHubToken {
@@ -125,6 +165,46 @@ namespace GitHubCE.Properties {
         internal static string GitHubUserName {
             get {
                 return ResourceManager.GetString("GitHubUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Import {
+            get {
+                object obj = ResourceManager.GetObject("Import", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Move {
+            get {
+                object obj = ResourceManager.GetObject("Move", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Network_Folder {
+            get {
+                object obj = ResourceManager.GetObject("Network_Folder", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Network_Map {
+            get {
+                object obj = ResourceManager.GetObject("Network_Map", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

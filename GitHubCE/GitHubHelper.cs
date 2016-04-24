@@ -20,6 +20,7 @@ using System.Management.Automation;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Management.Automation.Runspaces;
+using GitHubCE.Forms;
 
 namespace GitHubCE
 {
@@ -975,7 +976,15 @@ namespace GitHubCE
         }
         #endregion
 
+        private void patchFileMoverToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisplayPatchFileMover();
+        }
         private void patchHelperToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisplayPatchFileMover();
+        }
+        void DisplayPatchFileMover()
         {
             try
             {
@@ -985,29 +994,9 @@ namespace GitHubCE
                     var assemblyHelper = new PullRequestAssembyHelper(request, "rroberts");
                     var targetVersion = request.Version;
                     var patchHelper = new PatchHelper(assemblyHelper, targetVersion);
-                    var validationResults = patchHelper.ValidatePatchProcess();
 
-                    StringBuilder sb = new StringBuilder();
-                    if (validationResults.IsValid)
-                        sb.AppendLine("Validation Passed");
-                    else
-                    {
-                        sb.AppendLine("***** Validation Failed *****");
-                        foreach (var message in validationResults.Errors)
-                            sb.AppendLine(message);
-                    }
-
-                    if (validationResults.HasDebugMessages)
-                    {
-                        sb.AppendLine("***** DEBUG *****");
-                        foreach (var message in validationResults.DebugMessages)
-                        {
-                            sb.AppendLine(message);
-                        }
-                    }
-                    var validationReport = sb.ToString();
-                    Console.WriteLine(validationReport);
-                    txtAutoProcess.Text += validationReport + Environment.NewLine;
+                    var dialog = new PatchFileMoverDialog(patchHelper);
+                    dialog.ShowDialog(this);
                 }
             }
             catch (Exception ex)
@@ -1139,6 +1128,5 @@ namespace GitHubCE
         {
             MessageBox.Show("Error running build script");
         }
-  
     }
 }

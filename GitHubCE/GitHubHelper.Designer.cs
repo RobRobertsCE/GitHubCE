@@ -50,6 +50,10 @@
             this.pnlTop = new System.Windows.Forms.Panel();
             this.pnlAutoProcessSteps = new System.Windows.Forms.Panel();
             this.txtAutoProcess = new System.Windows.Forms.TextBox();
+            this.ctxSystemMessages = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.copyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.pnlMessages = new System.Windows.Forms.Panel();
@@ -98,6 +102,9 @@
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.patchHelperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.buildRepoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dllsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.executablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsbAdvantage = new System.Windows.Forms.ToolStripButton();
@@ -108,16 +115,11 @@
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbPullRequests = new System.Windows.Forms.ToolStripButton();
             this.splitter3 = new System.Windows.Forms.Splitter();
-            this.ctxSystemMessages = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
-            this.copyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.buildRepoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dllsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.executablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.patchFileMoverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxListView.SuspendLayout();
             this.pnlTop.SuspendLayout();
             this.pnlAutoProcessSteps.SuspendLayout();
+            this.ctxSystemMessages.SuspendLayout();
             this.pnlMessages.SuspendLayout();
             this.tabFiles.SuspendLayout();
             this.tpAssemblies.SuspendLayout();
@@ -130,7 +132,6 @@
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
-            this.ctxSystemMessages.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvPullRequests
@@ -220,10 +221,11 @@
             this.ctxListView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openJIRAIssueToolStripMenuItem,
             this.openPullRequestToolStripMenuItem,
+            this.patchFileMoverToolStripMenuItem,
             this.toolStripMenuItem2,
             this.cancelToolStripMenuItem});
             this.ctxListView.Name = "ctxListView";
-            this.ctxListView.Size = new System.Drawing.Size(172, 76);
+            this.ctxListView.Size = new System.Drawing.Size(172, 120);
             // 
             // openJIRAIssueToolStripMenuItem
             // 
@@ -284,6 +286,34 @@
             this.txtAutoProcess.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtAutoProcess.Size = new System.Drawing.Size(602, 153);
             this.txtAutoProcess.TabIndex = 5;
+            // 
+            // ctxSystemMessages
+            // 
+            this.ctxSystemMessages.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.copyAllToolStripMenuItem});
+            this.ctxSystemMessages.Name = "ctxSystemMessages";
+            this.ctxSystemMessages.Size = new System.Drawing.Size(156, 54);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.clearToolStripMenuItem.Text = "Clear Messages";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 6);
+            // 
+            // copyAllToolStripMenuItem
+            // 
+            this.copyAllToolStripMenuItem.Name = "copyAllToolStripMenuItem";
+            this.copyAllToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.copyAllToolStripMenuItem.Text = "Copy All";
+            this.copyAllToolStripMenuItem.Click += new System.EventHandler(this.copyAllToolStripMenuItem_Click);
             // 
             // label2
             // 
@@ -717,16 +747,39 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.optionsToolStripMenuItem.Text = "&Options";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
             // patchHelperToolStripMenuItem
             // 
             this.patchHelperToolStripMenuItem.Name = "patchHelperToolStripMenuItem";
-            this.patchHelperToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
-            this.patchHelperToolStripMenuItem.Text = "Patch Helper";
+            this.patchHelperToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.patchHelperToolStripMenuItem.Text = "Patch File Mover";
             this.patchHelperToolStripMenuItem.Click += new System.EventHandler(this.patchHelperToolStripMenuItem_Click);
+            // 
+            // buildRepoToolStripMenuItem
+            // 
+            this.buildRepoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dllsToolStripMenuItem,
+            this.executablesToolStripMenuItem});
+            this.buildRepoToolStripMenuItem.Name = "buildRepoToolStripMenuItem";
+            this.buildRepoToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.buildRepoToolStripMenuItem.Text = "Build Repo";
+            // 
+            // dllsToolStripMenuItem
+            // 
+            this.dllsToolStripMenuItem.Name = "dllsToolStripMenuItem";
+            this.dllsToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.dllsToolStripMenuItem.Text = "Dll\'s";
+            this.dllsToolStripMenuItem.Click += new System.EventHandler(this.dllsToolStripMenuItem_Click);
+            // 
+            // executablesToolStripMenuItem
+            // 
+            this.executablesToolStripMenuItem.Name = "executablesToolStripMenuItem";
+            this.executablesToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.executablesToolStripMenuItem.Text = "Executables";
+            this.executablesToolStripMenuItem.Click += new System.EventHandler(this.executablesToolStripMenuItem_Click);
             // 
             // toolStripContainer1
             // 
@@ -835,56 +888,12 @@
             this.splitter3.TabIndex = 9;
             this.splitter3.TabStop = false;
             // 
-            // ctxSystemMessages
+            // patchFileMoverToolStripMenuItem
             // 
-            this.ctxSystemMessages.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearToolStripMenuItem,
-            this.toolStripMenuItem3,
-            this.copyAllToolStripMenuItem});
-            this.ctxSystemMessages.Name = "ctxSystemMessages";
-            this.ctxSystemMessages.Size = new System.Drawing.Size(156, 54);
-            // 
-            // clearToolStripMenuItem
-            // 
-            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-            this.clearToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.clearToolStripMenuItem.Text = "Clear Messages";
-            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem3
-            // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 6);
-            // 
-            // copyAllToolStripMenuItem
-            // 
-            this.copyAllToolStripMenuItem.Name = "copyAllToolStripMenuItem";
-            this.copyAllToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.copyAllToolStripMenuItem.Text = "Copy All";
-            this.copyAllToolStripMenuItem.Click += new System.EventHandler(this.copyAllToolStripMenuItem_Click);
-            // 
-            // buildRepoToolStripMenuItem
-            // 
-            this.buildRepoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dllsToolStripMenuItem,
-            this.executablesToolStripMenuItem});
-            this.buildRepoToolStripMenuItem.Name = "buildRepoToolStripMenuItem";
-            this.buildRepoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.buildRepoToolStripMenuItem.Text = "Build Repo";
-            // 
-            // dllsToolStripMenuItem
-            // 
-            this.dllsToolStripMenuItem.Name = "dllsToolStripMenuItem";
-            this.dllsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.dllsToolStripMenuItem.Text = "Dll\'s";
-            this.dllsToolStripMenuItem.Click += new System.EventHandler(this.dllsToolStripMenuItem_Click);
-            // 
-            // executablesToolStripMenuItem
-            // 
-            this.executablesToolStripMenuItem.Name = "executablesToolStripMenuItem";
-            this.executablesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.executablesToolStripMenuItem.Text = "Executables";
-            this.executablesToolStripMenuItem.Click += new System.EventHandler(this.executablesToolStripMenuItem_Click);
+            this.patchFileMoverToolStripMenuItem.Name = "patchFileMoverToolStripMenuItem";
+            this.patchFileMoverToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.patchFileMoverToolStripMenuItem.Text = "Patch File Mover";
+            this.patchFileMoverToolStripMenuItem.Click += new System.EventHandler(this.patchFileMoverToolStripMenuItem_Click);
             // 
             // GitHubHelper
             // 
@@ -905,6 +914,7 @@
             this.pnlTop.ResumeLayout(false);
             this.pnlAutoProcessSteps.ResumeLayout(false);
             this.pnlAutoProcessSteps.PerformLayout();
+            this.ctxSystemMessages.ResumeLayout(false);
             this.pnlMessages.ResumeLayout(false);
             this.pnlMessages.PerformLayout();
             this.tabFiles.ResumeLayout(false);
@@ -924,7 +934,6 @@
             this.toolStripContainer1.PerformLayout();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
-            this.ctxSystemMessages.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1016,6 +1025,7 @@
         private System.Windows.Forms.ToolStripMenuItem buildRepoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dllsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem executablesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem patchFileMoverToolStripMenuItem;
     }
 }
 

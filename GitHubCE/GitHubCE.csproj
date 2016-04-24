@@ -76,6 +76,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Advantage\PatchHelper.cs" />
+    <Compile Include="Forms\PatchFileMoverDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PatchFileMoverDialog.Designer.cs">
+      <DependentUpon>PatchFileMoverDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="GitHubHelper.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,6 +101,9 @@
     <Compile Include="SettingsDialog.Designer.cs">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\PatchFileMoverDialog.resx">
+      <DependentUpon>PatchFileMoverDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GitHubHelper.resx">
       <DependentUpon>GitHubHelper.cs</DependentUpon>
     </EmbeddedResource>
@@ -127,6 +136,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Octocat.ico" />
+    <None Include="Resources\Generic_Document.png" />
+    <None Include="Resources\Network_Folder.png" />
+    <None Include="Resources\FolderOpen_32x32_72.png" />
+    <None Include="Resources\Network_Map.png" />
+    <None Include="Resources\Import.png" />
+    <None Include="Resources\112_RefreshArrow_Blue_32x42_72.png" />
+    <None Include="Resources\005_Task_32x42_72.png" />
+    <None Include="Resources\Move.png" />
     <None Include="Resources\305_Close_32x32_72.png" />
     <None Include="Resources\112_RefreshArrow_Green_32x32_72.png" />
     <None Include="Resources\ActivityReports.png" />
