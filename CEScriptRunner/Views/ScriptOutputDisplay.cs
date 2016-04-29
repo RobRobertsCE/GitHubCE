@@ -1,0 +1,256 @@
+﻿using Codeproject.PowerShell;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+using System.Windows.Forms;
+
+namespace CEScriptRunner.Views
+{
+    public partial class ScriptOutputDisplay : UserControl
+    {
+        //public class PSScriptRunner
+        //{
+        //    #region fields
+        //    /// <summary>
+        //    /// Powershell runspace
+        //    /// </summary>
+        //    private Runspace runSpace;
+
+        //    /// <summary>
+        //    /// The active PipelineExecutor instance
+        //    /// </summary>
+        //    private PipelineExecutor pipelineExecutor;
+
+        //    /// <summary>
+        //    /// The output display control
+        //    /// </summary>
+        //    private ScriptOutputDisplay display;
+        //    #endregion
+            
+        //    #region ctor
+        //    public PSScriptRunner()
+        //    {
+        //        // create Powershell runspace
+        //        runSpace = RunspaceFactory.CreateRunspace();
+        //        // open it
+        //        runSpace.Open();
+        //    }
+        //    #endregion
+
+        //    #region public
+        //    public void StartScript(string command)
+        //    {
+        //        StopScript();
+        //        pipelineExecutor = new PipelineExecutor(runSpace, display, command);
+        //        pipelineExecutor.OnDataReady += new PipelineExecutor.DataReadyDelegate(pipelineExecutor_OnDataReady);
+        //        pipelineExecutor.OnDataEnd += new PipelineExecutor.DataEndDelegate(pipelineExecutor_OnDataEnd);
+        //        pipelineExecutor.OnErrorReady += new PipelineExecutor.ErrorReadyDelegate(pipelineExecutor_OnErrorReady);
+        //        pipelineExecutor.Start();
+        //    }
+        //    #endregion
+
+        //    #region private
+        //    private void StopScript()
+        //    {
+        //        if (pipelineExecutor != null)
+        //        {
+        //            pipelineExecutor.OnDataReady -= new PipelineExecutor.DataReadyDelegate(pipelineExecutor_OnDataReady);
+        //            pipelineExecutor.OnDataEnd -= new PipelineExecutor.DataEndDelegate(pipelineExecutor_OnDataEnd);
+        //            pipelineExecutor.Stop();
+        //            pipelineExecutor = null;
+        //        }
+        //    }
+
+        //    private void pipelineExecutor_OnDataEnd(PipelineExecutor sender)
+        //    {
+        //        if (sender.Pipeline.PipelineStateInfo.State == PipelineState.Failed)
+        //        {
+        //            display.AppendLine(string.Format("Error in script: {0}", sender.Pipeline.PipelineStateInfo.Reason));
+        //        }
+        //        else
+        //        {
+        //            display.AppendLine("Ready.");
+        //        }
+        //    }
+
+        //    private void pipelineExecutor_OnDataReady(PipelineExecutor sender, ICollection<PSObject> data)
+        //    {
+        //        foreach (PSObject obj in data)
+        //        {
+        //            display.AppendLine(obj.ToString());
+        //        }
+        //    }
+
+        //    void pipelineExecutor_OnErrorReady(PipelineExecutor sender, ICollection<object> data)
+        //    {
+        //        foreach (object e in data)
+        //        {
+        //            display.AppendError("Error : " + e.ToString());
+        //        }
+        //    }
+        //    #endregion
+        //}
+
+        #region properties
+        public Color DisplayForeColor
+        {
+            get
+            {
+                return txtOutput.SelectionColor;
+            }
+            set
+            {
+                txtOutput.SelectionColor = value;
+            }
+        }
+
+        public Color DisplayPromptColor { get; set; }
+
+        public Font DisplayFont
+        {
+            get
+            {
+                return txtOutput.SelectionFont;
+            }
+            set
+            {
+                txtOutput.SelectionFont = value;
+            }
+        }
+
+        public Font PromptFont { get; set; }
+
+        public string Prompt { get; set; }
+
+        public bool HasPrompt
+        {
+            get
+            {
+                return (!string.IsNullOrEmpty(Prompt));
+            }
+        }
+        #endregion
+
+        #region ctor
+        public ScriptOutputDisplay()
+        {
+            InitializeComponent();
+            DisplayPromptColor = Color.WhiteSmoke;
+            PromptFont = new Font(txtOutput.SelectionFont.Name, txtOutput.SelectionFont.Size, txtOutput.SelectionFont.Style);           
+        }
+        #endregion
+
+        #region public
+        public void AppendTextBold(string line, Color? foreColor)
+        {
+            txtOutput.DeselectAll();
+            DisplayPrompt();
+            Font originalFont = (Font)txtOutput.SelectionFont.Clone();
+            txtOutput.SelectionFont = new Font(txtOutput.SelectionFont, FontStyle.Bold);
+            if (foreColor.HasValue)
+                txtOutput.SelectionColor = foreColor.Value;
+            txtOutput.AppendText(line);
+            if (foreColor.HasValue)
+                txtOutput.SelectionColor = DisplayForeColor;
+            txtOutput.SelectionFont = new Font(originalFont.Name, originalFont.Size, originalFont.Style);
+            txtOutput.ScrollToCaret();
+        }
+
+        public void AppendText(string line, Color? foreColor)
+        {
+            txtOutput.DeselectAll();
+            DisplayPrompt();
+            if (foreColor.HasValue)
+                txtOutput.SelectionColor = foreColor.Value;
+            txtOutput.AppendText(line);
+            if (foreColor.HasValue)
+                txtOutput.SelectionColor = DisplayForeColor;
+            txtOutput.ScrollToCaret();
+        }
+
+        public void AppendText(string line)
+        {
+            AppendText(line, null);
+        }
+
+        public void AppendLineBold(string line, Color? foreColor)
+        {
+            AppendTextBold(line + "\r\n", foreColor);
+        }
+
+        public void AppendLine(string line, Color? foreColor)
+        {
+            AppendText(line + "\r\n", foreColor);
+        }
+
+        public void AppendLine(string line)
+        {
+            AppendText(line + "\r\n", null);
+        }
+
+        public void AppendWarning(string line)
+        {
+            AppendLineBold(line + "\r\n", Color.Yellow);
+        }
+        public void AppendCommand(string line)
+        {
+            AppendLineBold(line + "\r\n", Color.Teal);
+        }
+        public void AppendError(string line)
+        {
+            AppendLineBold(line, Color.Red);
+#if (DEBUG)            
+                Console.WriteLine(line);
+#endif
+            }
+
+        public void ClearOutput()
+        {
+            txtOutput.Clear();
+        }
+
+        public void SelectAllAndCopy()
+        {
+            txtOutput.SelectAll();
+            txtOutput.Copy();
+        }
+#endregion
+
+#region protected
+        protected virtual void DisplayPrompt()
+        {
+            Font originalFont = (Font)txtOutput.SelectionFont.Clone();
+            Color originalColor = DisplayForeColor;
+            txtOutput.SelectionFont = PromptFont;
+            txtOutput.SelectionColor = DisplayPromptColor;
+            string promptText = Prompt;
+            if (HasPrompt)
+            {
+                if (promptText.Contains("{line#}"))
+                {
+                    var lineCount = (txtOutput.Lines.Length == 0) ? 1 : txtOutput.Lines.Length;
+                    promptText = promptText.Replace("{line#}", lineCount.ToString());
+                }
+
+                if (promptText.Contains("{timestamp}"))
+                    promptText = promptText.Replace("{timestamp}", DateTime.Now.ToString());
+
+                if (promptText.Contains("{dir}"))
+                    promptText = promptText.Replace("{dir}", Environment.CurrentDirectory);
+
+                if (promptText.Contains("{fol}"))
+                    promptText = promptText.Replace("{fol}", System.IO.Path.GetFileName(Environment.CurrentDirectory.TrimEnd('\\')));
+            }
+            else
+            {
+                promptText = ">";
+            }
+            txtOutput.AppendText(string.Format("{0} ", promptText));
+            txtOutput.SelectionColor = originalColor;
+            txtOutput.SelectionFont = originalFont;
+        }
+#endregion
+    }
+}

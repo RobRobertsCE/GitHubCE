@@ -21,6 +21,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Management.Automation.Runspaces;
 using GitHubCE.Forms;
+using CEScriptRunner;
 
 namespace GitHubCE
 {
@@ -42,6 +43,7 @@ namespace GitHubCE
         ListViewColumnSorter lvwColumnSorter;
         GitHubRepo _gitHubRepoHelper = null;
         int _daysBack = 0;
+        PSScriptRunner psRunner;
         #endregion
 
         #region Properties
@@ -98,6 +100,7 @@ namespace GitHubCE
         {
             InitializeComponent();
 
+
             // Create an instance of a ListView column sorter and assign it 
             // to the ListView control.
             lvwColumnSorter = new ListViewColumnSorter();
@@ -105,9 +108,13 @@ namespace GitHubCE
         }
         private void GitHubHelper_Load(object sender, EventArgs e)
         {
+            psRunner = new PSScriptRunner(scriptOutputDisplay1, "{dir}>", @"C:\users\rroberts\source\repos\advantage");
+            psRunner.ScriptComplete += PsRunner_ScriptComplete;
             LoadOptions();
             _formLoading = false;
+            psRunner.AddBlankLine();
         }
+
         void LoadOptions()
         {
             cboDaysBack.SelectedIndex = 0;
@@ -199,9 +206,9 @@ namespace GitHubCE
                         var lvi = new ListViewItem(new string[] {
                             request.Id.ToString(),
                             request.RepoName,
-                            request.Updated.ToString(),
+                            request.Updated.ToLocalTime().ToString(),
                             request.Title,
-                            request.JiraIssueNumber,
+                            request.JiraIssueKeyList, // request.JiraIssueNumber,
                             request.Branch,
                             request.Version.ToString(),
                             request.HasDbUpgrade ? "** YES **":"",
@@ -246,9 +253,9 @@ namespace GitHubCE
                         match.Text = request.Id.ToString();
                         match.SubItems.AddRange(new string[] {
                         request.RepoName,
-                        request.Updated.ToString(),
+                        request.Updated.ToLocalTime().ToString(),
                         request.Title,
-                        request.JiraIssueNumber,
+                        request.JiraIssueKeyList, // request.JiraIssueNumber,
                         request.Branch,
                         request.Version.ToString(),
                         request.HasDbUpgrade ? "** YES **":"",
@@ -377,9 +384,13 @@ namespace GitHubCE
 
         #region External Links
         // JIRA issue link format https://centeredge.atlassian.net/browse/ADVANTAGE-6311
-        private string GetJIRAIssueLink(string jiraIssue)
+        //private string GetJIRAIssueLink(string jiraIssue)
+        //{
+        //    return string.Format(@"https://centeredge.atlassian.net/browse/ADVANTAGE-{0}", jiraIssue);
+        //}
+        private string GetJIRAIssueLink(string repoName, string jiraIssue)
         {
-            return string.Format(@"https://centeredge.atlassian.net/browse/ADVANTAGE-{0}", jiraIssue);
+            return string.Format(@"https://centeredge.atlassian.net/browse/{0}-{1}", repoName, jiraIssue);
         }
 
         // GitHub issue link format https://github.com/CenterEdge/Advantage/pull/3831
@@ -427,7 +438,7 @@ namespace GitHubCE
                     return;
                 PullRequestView requestView = (PullRequestView)lvPullRequests.SelectedItems[0].Tag;
                 var request = (Octokit.Issue)requestView.Tag;
-                string url = GetJIRAIssueLink(requestView.JiraIssueNumber);
+                string url = GetJIRAIssueLink(requestView.RepoName, requestView.JiraIssueNumber);
                 System.Diagnostics.Process.Start(url);
             }
             catch (Exception ex)
@@ -601,6 +612,7 @@ namespace GitHubCE
         {
             // does this automatically
         }
+
         #endregion
 
         #region context menu items
@@ -616,6 +628,173 @@ namespace GitHubCE
         #endregion
 
         #region Toolbar Button Items
+
+        private void patchFileMoverToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisplayPatchFileMover();
+        }
+        private void patchHelperToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisplayPatchFileMover();
+        }
+        void DisplayPatchFileMover()
+        {
+            try
+            {
+                if (lvPullRequests.SelectedItems.Count > 0)
+                {
+                    PullRequestView request = (PullRequestView)lvPullRequests.SelectedItems[0].Tag;
+                    var assemblyHelper = new PullRequestAssembyHelper(request, "rroberts");
+                    var targetVersion = request.Version;
+                    var patchHelper = new PatchHelper(assemblyHelper, targetVersion);
+
+                    var dialog = new PatchFileMoverDialog(patchHelper);
+                    dialog.ShowDialog(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            txtAutoProcess.Clear();
+        }
+
+        private void copyAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            txtAutoProcess.SelectAll();
+            txtAutoProcess.Copy();
+        }
+
+        private void dllsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BuildDlls();
+        }
+        void BuildDlls()
+        {
+            try
+            {
+                using (PowerShell PowerShellInstance = PowerShell.Create())
+                {
+                    // use "AddScript" to add the contents of a script file to the end of the execution pipeline.
+                    // use "AddCommand" to add individual commands/cmdlets to the end of the execution pipeline.
+                    //PowerShellInstance.AddScript("param($param1) $d = get-date; $s = 'test string value'; " +
+                    //        "$d; $s; $param1; get-service");
+
+                    string buildScript = @"C:\Users\rroberts\Source\Repos\Advantage\tools\build\build.ps1";
+
+                    PowerShellInstance.AddCommand(buildScript);
+
+                    // invoke execution on the pipeline (collecting output)
+                    Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
+
+                    powershellStringBuilder = new StringBuilder();
+                    // loop through each output object item
+                    foreach (PSObject outputItem in PSOutput)
+                    {
+                        // if null object was dumped to the pipeline during the script then a null
+                        // object may be present here. check for null to prevent potential NRE.
+                        if (outputItem != null)
+                        {
+                            //TODO: do something with the output item 
+                            // outputItem.BaseOBject
+                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
+                        }
+                    }
+                    var scriptOutput = powershellStringBuilder.ToString();
+
+                    Console.WriteLine(scriptOutput);
+                    txtAutoProcess.Text += scriptOutput;
+
+                    if (scriptOutput.Contains("error"))
+                    {
+                        NotifyError();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+
+            Console.WriteLine("Done");
+        }
+        private void executablesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BuildExecutables();
+        }
+        StringBuilder powershellStringBuilder = null;
+        void BuildExecutables()
+        {
+            try
+            {
+                using (PowerShell PowerShellInstance = PowerShell.Create())
+                {
+                    // use "AddScript" to add the contents of a script file to the end of the execution pipeline.
+                    // use "AddCommand" to add individual commands/cmdlets to the end of the execution pipeline.
+                    //PowerShellInstance.AddScript("param($param1) $d = get-date; $s = 'test string value'; " +
+                    //        "$d; $s; $param1; get-service");
+
+                    string buildScript = @"C:\Users\rroberts\Source\Repos\Advantage\tools\build\build.ps1";
+
+                    PowerShellInstance.AddCommand(buildScript);
+                    PowerShellInstance.AddParameter("Target", "Executables");
+
+                    // invoke execution on the pipeline (collecting output)
+                    Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
+
+                    powershellStringBuilder = new StringBuilder();
+                    // loop through each output object item
+                    foreach (PSObject outputItem in PSOutput)
+                    {
+                        // if null object was dumped to the pipeline during the script then a null
+                        // object may be present here. check for null to prevent potential NRE.
+                        if (outputItem != null)
+                        {
+                            //TODO: do something with the output item 
+                            // outputItem.BaseOBject
+                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
+                        }
+                    }
+                    var scriptOutput = powershellStringBuilder.ToString();
+
+                    Console.WriteLine(scriptOutput);
+                    txtAutoProcess.Text += scriptOutput;
+
+                    if (scriptOutput.Contains("error"))
+                    {
+                        NotifyError();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+
+            Console.WriteLine("Done");
+        }
+        void NotifyError()
+        {
+            MessageBox.Show("Error running build script");
+        }
+
+        private void dbVersionHelperToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                GitHubCE.Logic.DbVersionHelper versionHelper = new GitHubCE.Logic.DbVersionHelper("ADVANTAGE", "rroberts");
+                DbVersionDialog dialog = new DbVersionDialog();
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
         private void tsbTimer_Click(object sender, EventArgs e)
         {
             ToggleTimerState();
@@ -718,6 +897,35 @@ namespace GitHubCE
             ClearRequests();
         }
         #endregion
+
+        #region search toolbar
+        private void txtJiraSearchNumber_TextChanged(object sender, EventArgs e)
+        {
+            tsbJiraSearch.Enabled = !(String.IsNullOrEmpty(txtJiraSearchNumber.Text));
+        }
+
+        private void tsbJiraSearch_Click(object sender, EventArgs e)
+        {
+            SearchForJiraIssue();
+        }
+
+        private void SearchForJiraIssue()
+        {
+            try
+            {
+                ClearRequests();
+                ClearRequestDetails();
+
+                var jiraSearchNumber = txtJiraSearchNumber.Text;
+                SearchForRequests(null, jiraSearchNumber);
+                SafeDisplayPullRequests(PullRequests);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+        #endregion
         #endregion
 
         #region Form State
@@ -802,7 +1010,7 @@ namespace GitHubCE
                 SetFormStateBusy();
                 if (null == _gitHubRepoHelper)
                 {
-                    _gitHubRepoHelper = new GitHubRepo(Settings.Default.GitHubRepoOwner, Settings.Default.GitHubUserName, Settings.Default.GitHubToken);//, repoName);
+                    _gitHubRepoHelper = new GitHubRepo(Settings.Default.GitHubRepoOwner, Settings.Default.GitHubUserName, Settings.Default.GitHubToken);
                     _gitHubRepoHelper.NewPullRequests += CustReports_NewPullRequests;
                     _gitHubRepoHelper.GetPullRequestsComplete += CustReports_GetPullRequestComplete;
                 }
@@ -810,6 +1018,28 @@ namespace GitHubCE
                 await Task.Run(() =>
                 {
                     _gitHubRepoHelper.GetRequests(state, _daysBack, _repoNames);
+                });
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+        private async void SearchForRequests(ItemState? state, string jiraIssueNumber)
+        {
+            try
+            {
+                SetFormStateBusy();
+                if (null == _gitHubRepoHelper)
+                {
+                    _gitHubRepoHelper = new GitHubRepo(Settings.Default.GitHubRepoOwner, Settings.Default.GitHubUserName, Settings.Default.GitHubToken);
+                    _gitHubRepoHelper.NewPullRequests += CustReports_NewPullRequests;
+                    _gitHubRepoHelper.GetPullRequestsComplete += CustReports_GetPullRequestComplete;
+                }
+                // start new thread here
+                await Task.Run(() =>
+                {
+                    _gitHubRepoHelper.SearchRequestsByJiraIssue(state, 365, _repoNames, jiraIssueNumber);
                 });
             }
             catch (Exception ex)
@@ -974,159 +1204,120 @@ namespace GitHubCE
             }
 
         }
+
+        private void tsbBuildExecutables_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                psRunner.StartScript(@".\tools\build\build -Target Executables");
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+
+        private void tsbBuildAssemblies_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                psRunner.StartScript(@".\tools\build\build.ps1");
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+
+        private void tsbPull_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IList<string> commands = new List<string>();
+                commands.Add(@"git checkout develop");
+                commands.Add(@"git pull");
+                RunCommandList(commands);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+        private IList<string> _commandList;
+        private int _currentCommandIdx = -1;
+        private bool _runningCommands = false;
+        private void RunCommandList(IList<string> commands)
+        {
+            if (_runningCommands)
+            {
+                MessageBox.Show("Already Running A Command List");
+                return;
+            }
+            _commandList = commands;
+            _currentCommandIdx = -1;
+            try
+            {
+                _runningCommands = true;
+                RunNextCommand();
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+        private void RunNextCommand()
+        {
+            _currentCommandIdx++;
+            if (_commandList.Count > _currentCommandIdx)
+            {
+                var command = _commandList[_currentCommandIdx];
+                psRunner.StartScript(command);
+            }
+            else
+            {
+                _runningCommands = false;
+            }
+        }
+
+        private void PsRunner_ScriptComplete(object sender, bool isSuccessful)
+        {
+            if (_runningCommands && isSuccessful)
+            {
+                RunNextCommand();
+            }
+            else
+            {
+                _runningCommands = false;
+            }
+        }
+
+        private void tsbRunCommand_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IList<string> commands = new List<string>();
+                commands.Add(txtCommand.Text);
+                RunCommandList(commands);
+                txtCommand.Clear();
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
         #endregion
 
-        private void patchFileMoverToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            DisplayPatchFileMover();
-        }
-        private void patchHelperToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            DisplayPatchFileMover();
-        }
-        void DisplayPatchFileMover()
-        {
-            try
-            {
-                if (lvPullRequests.SelectedItems.Count > 0)
-                {
-                    PullRequestView request = (PullRequestView)lvPullRequests.SelectedItems[0].Tag;
-                    var assemblyHelper = new PullRequestAssembyHelper(request, "rroberts");
-                    var targetVersion = request.Version;
-                    var patchHelper = new PatchHelper(assemblyHelper, targetVersion);
-
-                    var dialog = new PatchFileMoverDialog(patchHelper);
-                    dialog.ShowDialog(this);
-                }
-            }
-            catch (Exception ex)
-            {
-                ExceptionHandler(ex);
-            }
-        }
-
-        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            txtAutoProcess.Clear();
-        }
-
-        private void copyAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            txtAutoProcess.SelectAll();
-            txtAutoProcess.Copy();
-        }
-
-        private void dllsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            BuildDlls();
-        }
-        void BuildDlls()
-        {
-            try
-            {
-                using (PowerShell PowerShellInstance = PowerShell.Create())
-                {
-                    // use "AddScript" to add the contents of a script file to the end of the execution pipeline.
-                    // use "AddCommand" to add individual commands/cmdlets to the end of the execution pipeline.
-                    //PowerShellInstance.AddScript("param($param1) $d = get-date; $s = 'test string value'; " +
-                    //        "$d; $s; $param1; get-service");
-
-                    string buildScript = @"C:\Users\rroberts\Source\Repos\Advantage\tools\build\build.ps1";
-
-                    PowerShellInstance.AddCommand(buildScript);
-
-                    // invoke execution on the pipeline (collecting output)
-                    Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
-
-                    powershellStringBuilder = new StringBuilder();
-                    // loop through each output object item
-                    foreach (PSObject outputItem in PSOutput)
-                    {
-                        // if null object was dumped to the pipeline during the script then a null
-                        // object may be present here. check for null to prevent potential NRE.
-                        if (outputItem != null)
-                        {
-                            //TODO: do something with the output item 
-                            // outputItem.BaseOBject
-                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
-                        }
-                    }
-                    var scriptOutput = powershellStringBuilder.ToString();
-
-                    Console.WriteLine(scriptOutput);
-                    txtAutoProcess.Text += scriptOutput;
-
-                    if (scriptOutput.Contains("error"))
-                    {
-                        NotifyError();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ExceptionHandler(ex);
-            }
-
-            Console.WriteLine("Done");
-        }
-        private void executablesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            BuildExecutables();
-        }
-        StringBuilder powershellStringBuilder = null;
-        void BuildExecutables()
-        {
-            try
-            {
-                using (PowerShell PowerShellInstance = PowerShell.Create())
-                {
-                    // use "AddScript" to add the contents of a script file to the end of the execution pipeline.
-                    // use "AddCommand" to add individual commands/cmdlets to the end of the execution pipeline.
-                    //PowerShellInstance.AddScript("param($param1) $d = get-date; $s = 'test string value'; " +
-                    //        "$d; $s; $param1; get-service");
-
-                    string buildScript = @"C:\Users\rroberts\Source\Repos\Advantage\tools\build\build.ps1";
-
-                    PowerShellInstance.AddCommand(buildScript);
-                    PowerShellInstance.AddParameter("Target", "Executables");
-
-                    // invoke execution on the pipeline (collecting output)
-                    Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
-
-                    powershellStringBuilder = new StringBuilder();
-                    // loop through each output object item
-                    foreach (PSObject outputItem in PSOutput)
-                    {
-                        // if null object was dumped to the pipeline during the script then a null
-                        // object may be present here. check for null to prevent potential NRE.
-                        if (outputItem != null)
-                        {
-                            //TODO: do something with the output item 
-                            // outputItem.BaseOBject
-                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
-                        }
-                    }
-                    var scriptOutput = powershellStringBuilder.ToString();
-
-                    Console.WriteLine(scriptOutput);
-                    txtAutoProcess.Text += scriptOutput;
-
-                    if (scriptOutput.Contains("error"))
-                    {
-                        NotifyError();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ExceptionHandler(ex);
-            }
-
-            Console.WriteLine("Done");
-        }
-        void NotifyError()
-        {
-            MessageBox.Show("Error running build script");
-        }
+        //private void toolStripButton1_Click(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        var jira = new JiraIssueHelper(Settings.Default.JiraUrl, Settings.Default.JiraUserName, Settings.Default.JiraUserPassword);
+        //        jira.GetJiraProjects();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ExceptionHandler(ex);
+        //    }          
+        //}
     }
 }

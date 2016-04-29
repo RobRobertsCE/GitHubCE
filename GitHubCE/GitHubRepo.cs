@@ -41,6 +41,7 @@ namespace GitHubCE
         private readonly string _owner;
         private readonly string _user;
         private readonly string _token;
+        IList<string> _jiraIssuePrefixes = new List<string>() { "ADVANTAGE", "WEB", "SITEINFO", "ONLINE", "MOBILEINV", "MOBILETIK" };
         #endregion
 
         #region properties        
@@ -123,6 +124,14 @@ namespace GitHubCE
         {
             var result = GetPullRequestViews(state, searchDates, repoNames);
         }
+        public void SearchRequestsByJiraIssue(ItemState? state, int daysBack, IList<string> repoNames, string jiraIssueNumber)
+        {
+            var result = GetPullRequestViewsByJiraNumber(state, new DateRange(DateTime.Now.AddDays(-1 * daysBack), SearchQualifierOperator.GreaterThanOrEqualTo), repoNames, jiraIssueNumber);
+        }
+        public void SearchRequestsByJiraIssue(ItemState? state, DateRange searchDates, IList<string> repoNames, string jiraIssueNumber)
+        {
+            var result = GetPullRequestViewsByJiraNumber(state, searchDates, repoNames, jiraIssueNumber);
+        }
         #endregion
 
         #region private           
@@ -158,7 +167,58 @@ namespace GitHubCE
                         if (pullRequest.Updated != request.UpdatedAt.GetValueOrDefault())
                         {
                             pullRequest = await GetPullRequestDetails(request, pullRequest);
-                        }                       
+                        }
+                    }
+                }
+
+                foreach (var requestToRemove in PullRequests.Where(r => existingRequestIds.Contains(r.Id)).ToList())
+                {
+                    PullRequests.Remove(requestToRemove);
+                }
+
+                if (hasNewRequests)
+                    OnNewPullRequest();
+
+                OnGetPullRequestsComplete();
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+        async Task GetPullRequestViewsByJiraNumber(ItemState? state, DateRange searchDates, IList<string> repoNames, string jiraIssueNumber)
+        {
+            try
+            {
+                var hasNewRequests = false;
+
+                var searchResults = await SearchPullRequests(state, searchDates, repoNames, jiraIssueNumber);
+
+                // Gets general info on each Pull Request.
+                var existingRequestIds = PullRequests.Select(r => r.Id).ToList();
+
+                foreach (var request in searchResults.Items)
+                {
+                    var repositoryName = request.PullRequest.HtmlUrl.Segments[2].TrimEnd('/');
+
+                    var pullRequest = PullRequests.FirstOrDefault(r => r.Id == request.Number);
+                    if (null == pullRequest)
+                    {
+                        pullRequest = GetNewPullRequestView(request);
+                        // Get detailed info on each Pull Request.
+                        pullRequest = await GetPullRequestDetails(request, pullRequest);
+
+                        PullRequests.Add(pullRequest);
+                        if (pullRequest.State == ItemState.Open)
+                            hasNewRequests = true;
+                    }
+                    else // already had a copy in our list.. update it
+                    {
+                        existingRequestIds.Remove(request.Number);
+                        if (pullRequest.Updated != request.UpdatedAt.GetValueOrDefault())
+                        {
+                            pullRequest = await GetPullRequestDetails(request, pullRequest);
+                        }
                     }
                 }
 
@@ -199,7 +259,7 @@ namespace GitHubCE
 
         async Task<PullRequestView> GetPullRequestDetails(Octokit.Issue request, PullRequestView pullRequest)
         {
-            var pullRequestDetails =  await Client.Repository.PullRequest.Get(_owner, pullRequest.RepoName, pullRequest.Id);         
+            var pullRequestDetails = await Client.Repository.PullRequest.Get(_owner, pullRequest.RepoName, pullRequest.Id);
 
             pullRequest.Branch = pullRequestDetails.Base.Ref;
             pullRequest.Version = BranchHelper.Map.GetVersion(pullRequest.Branch);
@@ -209,9 +269,9 @@ namespace GitHubCE
             pullRequest.State = pullRequestDetails.State;
             pullRequest.CommitCount = pullRequestDetails.Commits;
             pullRequest.JiraIssues = GetJiraIssues(request, pullRequest.RepoName);
-            
+
             pullRequest = await UpdateCommits(request, pullRequest, pullRequestDetails.Head.Sha);
-          
+
             return pullRequest;
         }
 
@@ -252,7 +312,33 @@ namespace GitHubCE
 
             return await Client.Search.SearchIssues(searchRequest);
         }
-      
+
+        async Task<SearchIssuesResult> SearchPullRequests(ItemState? state, DateRange searchDates, IList<string> repoNames, string jiraIssueNumber)
+        {
+            // Documentation: http://octokitnet.readthedocs.org/en/latest/search/
+            SearchIssuesRequest request = new SearchIssuesRequest(jiraIssueNumber)
+            {
+                // only search pull requests
+                Type = IssueTypeQualifier.PR,
+                State = state,
+                Updated = searchDates
+            };
+
+            // if you're searching for a specific term, you can
+            // focus your search on specific criteria
+            request.In = new[] {
+                    IssueInQualifier.Title,
+                    IssueInQualifier.Body
+                };
+
+            foreach (var repoName in repoNames)
+            {
+                request.Repos.Add(String.Format(@"{0}/{1}", _owner, repoName));
+            }
+
+            return await Client.Search.SearchIssues(request);
+        }
+
         IList<Atlassian.Jira.Issue> GetJiraIssues(Octokit.Issue request, string repoName)
         {
             var jiraIssues = new List<Atlassian.Jira.Issue>();
@@ -273,10 +359,10 @@ namespace GitHubCE
             {
                 titleAndBody += request.Body;
             }
-            var jiraIssueNumbers = GetJiraIssueNumbers(titleAndBody, repoName);
+            var jiraIssueNumbers = GetJiraIssueNumbers(titleAndBody);
             foreach (var jiraIssueNumber in jiraIssueNumbers)
             {
-                var jiraIssue = JiraHelper.GetJiraIssue(jiraIssueNumber);
+                var jiraIssue = JiraHelper.GetJiraIssueByKey(jiraIssueNumber);
                 if (null != jiraIssue)
                 {
                     jiraIssues.Add(jiraIssue);
@@ -285,43 +371,49 @@ namespace GitHubCE
             return jiraIssues;
         }
 
-        IList<string> GetJiraIssueNumbers(string body, string repoName)
+        IList<string> GetJiraIssueNumbers(string body)
         {
             var issueNumbers = new List<string>();
 
-            var tokenLength = repoName.Length;
-
-            body = body.ToUpper();
-            repoName = repoName.ToUpper();
-
-            if (body.Contains(repoName))
+            foreach (var repoName in _jiraIssuePrefixes)
             {
-                for (int i = 0; i < body.Length - tokenLength; i++)
+                var tokenLength = repoName.Length;
+
+                body = body.ToUpper();
+
+                if (body.Contains(repoName))
                 {
-                    if (body.Substring(i, tokenLength) == repoName)
+                    for (int i = 0; i < body.Length - tokenLength; i++)
                     {
-                        var issueNumberBuffer = String.Empty;
-                        var nextIdx = 0;
-                        // add 1 for the '-' character. (Sometimes it is a different character, so we don't hard-code it.)
-                        var textSection = body.Substring(i + tokenLength + 1);
-                        while (GetNumberValue(textSection, ref issueNumberBuffer, ref nextIdx))
+                        if (body.Substring(i, tokenLength) == repoName)
                         {
-                            if (!issueNumbers.Contains(issueNumberBuffer))
-                                issueNumbers.Add(issueNumberBuffer);
-                            if ("," == body.Substring(nextIdx + i + tokenLength - 1, 1))
+                            var issueNumberBuffer = String.Empty;
+                            var nextIdx = 0;
+                            // add 1 for the '-' character. (Sometimes it is a different character, so we don't hard-code it.)
+                            var textSection = body.Substring(i + tokenLength + 1);
+                            while (GetNumberValue(textSection, ref issueNumberBuffer, ref nextIdx))
                             {
-                                textSection = body.Substring(nextIdx + i + tokenLength);
-                            }
-                            else
-                            {
-                                break;
+                                if (!issueNumbers.Contains(issueNumberBuffer) && !String.IsNullOrEmpty(issueNumberBuffer))
+                                {
+                                    //issueNumbers.Add(issueNumberBuffer);
+                                    issueNumbers.Add(String.Format("{0}-{1}", repoName, issueNumberBuffer));
+                                }                                   
+
+                                if ("," == body.Substring(nextIdx + i + tokenLength - 1, 1))
+                                {
+                                    textSection = body.Substring(nextIdx + i + tokenLength);
+                                }
+                                else
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            return issueNumbers;
+            return issueNumbers.Where(i => !String.IsNullOrEmpty(i)).ToList();
         }
 
         bool GetNumberValue(string buffer, ref string numberValue, ref int nextIdx)

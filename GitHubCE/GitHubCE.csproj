@@ -76,6 +76,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Advantage\PatchHelper.cs" />
+    <Compile Include="Forms\DbVersionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DbVersionDialog.Designer.cs">
+      <DependentUpon>DbVersionDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\PatchFileMoverDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -92,6 +98,8 @@
     <Compile Include="JiraStatus.cs" />
     <Compile Include="Logic\AutoProcessPullRequest.cs" />
     <Compile Include="Advantage\PullRequestAssembyHelper.cs" />
+    <Compile Include="Logic\DbVersionHelper.cs" />
+    <Compile Include="Logic\TaskResult.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PullRequestView.cs" />
@@ -101,6 +109,9 @@
     <Compile Include="SettingsDialog.Designer.cs">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\DbVersionDialog.resx">
+      <DependentUpon>DbVersionDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\PatchFileMoverDialog.resx">
       <DependentUpon>PatchFileMoverDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -136,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Octocat.ico" />
+    <None Include="Resources\SearchWebHS.png" />
     <None Include="Resources\Generic_Document.png" />
     <None Include="Resources\Network_Folder.png" />
     <None Include="Resources\FolderOpen_32x32_72.png" />
@@ -159,6 +171,10 @@
     <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj">
       <Project>{438eb0cf-d781-4f1b-9bd3-b33638aa8d1d}</Project>
       <Name>Atlassian.Jira</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CEScriptRunner\CEScriptRunner.csproj">
+      <Project>{ae56e605-bbe7-46d4-8fb4-39287541ec55}</Project>
+      <Name>CEScriptRunner</Name>
     </ProjectReference>
     <ProjectReference Include="..\DbVersionLibrary\DbVersionLibrary.csproj">
       <Project>{b91c1cc3-4e04-4abb-92d6-159c4579bf8e}</Project>

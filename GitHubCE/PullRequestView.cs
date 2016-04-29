@@ -15,17 +15,18 @@ namespace GitHubCE
         public string RepoName { get; set; }
         public string Title { get; set; }
         public bool HasBuildScriptChange { get; set; }
-        public string JiraIssueNumber {
+        public string JiraIssueNumber
+        {
             get
             {
-                if (JiraIssues.Count>0)
+                if (JiraIssues.Count > 0)
                 {
                     return JiraIssueNumbers.FirstOrDefault().ToString();
                 }
                 else
                 {
                     return "-";
-                }                
+                }
             }
         }
         public string JiraIssueStatus
@@ -53,7 +54,7 @@ namespace GitHubCE
         public bool JiraUpdated { get; set; }
         public bool HasDbUpgrade { get; set; }
         public bool DbScriptsApplied { get; set; }
-        public bool NeedsDevAttention { get; set; }        
+        public bool NeedsDevAttention { get; set; }
         public string Developer { get; set; }
         public object Tag { get; set; }
         public int CommitCount { get; set; }
@@ -82,10 +83,32 @@ namespace GitHubCE
                         JiraIssueNumbers.Add(issueNumber);
                     }
                 }
-                
             }
         }
         public IList<int> JiraIssueNumbers { get; private set; }
+
+        public IList<string> JiraIssueKeys
+        {
+            get
+            {
+                var keys = new List<string>();
+                if (JiraIssues.Count > 0)
+                {
+                    foreach (var issue in JiraIssues)
+                    {
+                        keys.Add(issue.Key.Value);
+                    }
+                }
+                return keys;
+            }
+        }
+        public string JiraIssueKeyList
+        {
+            get
+            {                
+                return String.Join(", ", JiraIssueKeys);
+            }
+        }
 
         public PullRequestView()
         {

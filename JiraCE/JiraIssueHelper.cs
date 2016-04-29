@@ -1,10 +1,12 @@
 ﻿using Atlassian.Jira;
 using System;
+using System.Linq;
+
 namespace JiraCE
 {
     public class JiraIssueHelper : IDisposable
     {
-        #region consts
+        #region fields
         private readonly string _jiraUrl;
         private readonly string _jiraUserName;
         private readonly string _jiraUserPassword;
@@ -33,27 +35,7 @@ namespace JiraCE
         }
         #endregion
 
-        #region public methods
-        public Issue GetJiraIssue(string jiraIssueNumber)
-        {
-            try
-            {
-                if (String.Empty.Equals(jiraIssueNumber)) throw new ArgumentNullException("jiraIssueNumber");
-
-                if (!IsNumeric(jiraIssueNumber))
-                {
-                    Console.WriteLine(jiraIssueNumber + " Is Invalid JIRA Issue Number!");
-                    return null;
-                }
-
-                return JiraService.GetIssue($"ADVANTAGE-{jiraIssueNumber}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                throw;
-            }
-        }
+        #region public methods       
         /// <summary>
         /// Returns a Jira Issue for the given key.
         /// </summary>
@@ -80,6 +62,24 @@ namespace JiraCE
             else
                 throw new InvalidOperationException("Issue Key Not For an Epic");
         }
+
+        public void GetJiraProjects()
+        {
+            var projects = JiraService.GetProjects();
+
+            foreach (var project in projects)
+            {
+                Console.WriteLine("Id:{0}; Key:{1}; Name:{2}; Lead:{3}", project.Id, project.Key, project.Name, project.Lead);
+            }
+        }
+
+
+        public Project GetJiraProject(string key)
+        {
+            var project = JiraService.GetProjects().FirstOrDefault(projects => projects.Key == key);
+
+            return project;
+        }        
 
         public static System.Boolean IsNumeric(System.Object Expression)
         {
