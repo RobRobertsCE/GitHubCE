@@ -110,9 +110,17 @@ namespace GitHubCE
         {
             psRunner = new PSScriptRunner(scriptOutputDisplay1, "{dir}>", @"C:\users\rroberts\source\repos\advantage");
             psRunner.ScriptComplete += PsRunner_ScriptComplete;
+            psRunner.RequestComplete += PsRunner_RequestComplete;
             LoadOptions();
             _formLoading = false;
             psRunner.AddBlankLine();
+        }
+
+        private void PsRunner_RequestComplete(object sender, string data)
+        {
+            if (!cmbBranches.Items.Contains(data))
+                cmbBranches.Items.Add(data);
+            cmbBranches.SelectedItem = data;
         }
 
         void LoadOptions()
@@ -1233,10 +1241,11 @@ namespace GitHubCE
         {
             try
             {
-                IList<string> commands = new List<string>();
-                commands.Add(@"git checkout develop");
-                commands.Add(@"git pull");
-                RunCommandList(commands);
+                //IList<string> commands = new List<string>();
+                //commands.Add(@"git checkout develop");
+                //commands.Add(@"git pull");
+                //RunCommandList(commands);
+                psRunner.GetCurrentBranch();
             }
             catch (Exception ex)
             {
@@ -1293,18 +1302,57 @@ namespace GitHubCE
 
         private void tsbRunCommand_Click(object sender, EventArgs e)
         {
+            RunPsCommand();
+        }
+
+        private void txtCommand_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                RunPsCommand();
+        }
+
+        private void RunPsCommand()
+        {
             try
             {
                 IList<string> commands = new List<string>();
-                commands.Add(txtCommand.Text);
+                var commandText = cboCommand.Text;
+                commands.Add(commandText);
                 RunCommandList(commands);
-                txtCommand.Clear();
+                cboCommand.Items.Insert(0, commandText);
+                cboCommand.Text = "";
+                cboCommand.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
                 ExceptionHandler(ex);
             }
         }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            CheckoutAndBuildBranch();
+        }
+        private void CheckoutAndBuildBranch()
+        {
+            try
+            {
+                IList<string> commands = new List<string>();
+                var branchName = cmbBranches.Text;
+
+                commands.Add(String.Format("git checkout {0}", branchName));
+                commands.Add("git pull");
+                commands.Add(@".\tools\build\build.ps1");
+
+                RunCommandList(commands);
+                
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+
         #endregion
 
         //private void toolStripButton1_Click(object sender, EventArgs e)

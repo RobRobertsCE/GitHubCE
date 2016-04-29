@@ -147,6 +147,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Octocat.ico" />
+    <None Include="Resources\Git-Icon-Black.png" />
+    <None Include="Resources\default-space-logo-256.png" />
+    <None Include="Resources\logoBambooPNG.png" />
+    <None Include="Resources\JIRA.png" />
+    <None Include="Resources\Git.png" />
+    <None Include="Resources\startwithoutdebugging_6556.png" />
+    <None Include="Resources\BuildSolution_104_24.bmp" />
+    <None Include="Resources\BuildSolution_104_32.bmp" />
+    <None Include="Resources\BuildSolution_104.png" />
     <None Include="Resources\SearchWebHS.png" />
     <None Include="Resources\Generic_Document.png" />
     <None Include="Resources\Network_Folder.png" />

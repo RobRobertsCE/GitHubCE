@@ -10,89 +10,6 @@ namespace CEScriptRunner.Views
 {
     public partial class ScriptOutputDisplay : UserControl
     {
-        //public class PSScriptRunner
-        //{
-        //    #region fields
-        //    /// <summary>
-        //    /// Powershell runspace
-        //    /// </summary>
-        //    private Runspace runSpace;
-
-        //    /// <summary>
-        //    /// The active PipelineExecutor instance
-        //    /// </summary>
-        //    private PipelineExecutor pipelineExecutor;
-
-        //    /// <summary>
-        //    /// The output display control
-        //    /// </summary>
-        //    private ScriptOutputDisplay display;
-        //    #endregion
-            
-        //    #region ctor
-        //    public PSScriptRunner()
-        //    {
-        //        // create Powershell runspace
-        //        runSpace = RunspaceFactory.CreateRunspace();
-        //        // open it
-        //        runSpace.Open();
-        //    }
-        //    #endregion
-
-        //    #region public
-        //    public void StartScript(string command)
-        //    {
-        //        StopScript();
-        //        pipelineExecutor = new PipelineExecutor(runSpace, display, command);
-        //        pipelineExecutor.OnDataReady += new PipelineExecutor.DataReadyDelegate(pipelineExecutor_OnDataReady);
-        //        pipelineExecutor.OnDataEnd += new PipelineExecutor.DataEndDelegate(pipelineExecutor_OnDataEnd);
-        //        pipelineExecutor.OnErrorReady += new PipelineExecutor.ErrorReadyDelegate(pipelineExecutor_OnErrorReady);
-        //        pipelineExecutor.Start();
-        //    }
-        //    #endregion
-
-        //    #region private
-        //    private void StopScript()
-        //    {
-        //        if (pipelineExecutor != null)
-        //        {
-        //            pipelineExecutor.OnDataReady -= new PipelineExecutor.DataReadyDelegate(pipelineExecutor_OnDataReady);
-        //            pipelineExecutor.OnDataEnd -= new PipelineExecutor.DataEndDelegate(pipelineExecutor_OnDataEnd);
-        //            pipelineExecutor.Stop();
-        //            pipelineExecutor = null;
-        //        }
-        //    }
-
-        //    private void pipelineExecutor_OnDataEnd(PipelineExecutor sender)
-        //    {
-        //        if (sender.Pipeline.PipelineStateInfo.State == PipelineState.Failed)
-        //        {
-        //            display.AppendLine(string.Format("Error in script: {0}", sender.Pipeline.PipelineStateInfo.Reason));
-        //        }
-        //        else
-        //        {
-        //            display.AppendLine("Ready.");
-        //        }
-        //    }
-
-        //    private void pipelineExecutor_OnDataReady(PipelineExecutor sender, ICollection<PSObject> data)
-        //    {
-        //        foreach (PSObject obj in data)
-        //        {
-        //            display.AppendLine(obj.ToString());
-        //        }
-        //    }
-
-        //    void pipelineExecutor_OnErrorReady(PipelineExecutor sender, ICollection<object> data)
-        //    {
-        //        foreach (object e in data)
-        //        {
-        //            display.AppendError("Error : " + e.ToString());
-        //        }
-        //    }
-        //    #endregion
-        //}
-
         #region properties
         public Color DisplayForeColor
         {
@@ -138,7 +55,7 @@ namespace CEScriptRunner.Views
         {
             InitializeComponent();
             DisplayPromptColor = Color.WhiteSmoke;
-            PromptFont = new Font(txtOutput.SelectionFont.Name, txtOutput.SelectionFont.Size, txtOutput.SelectionFont.Style);           
+            PromptFont = new Font(txtOutput.SelectionFont.Name, txtOutput.SelectionFont.Size, txtOutput.SelectionFont.Style);
         }
         #endregion
 
@@ -201,10 +118,10 @@ namespace CEScriptRunner.Views
         public void AppendError(string line)
         {
             AppendLineBold(line, Color.Red);
-#if (DEBUG)            
-                Console.WriteLine(line);
+#if (DEBUG)
+            Console.WriteLine(line);
 #endif
-            }
+        }
 
         public void ClearOutput()
         {
@@ -216,9 +133,9 @@ namespace CEScriptRunner.Views
             txtOutput.SelectAll();
             txtOutput.Copy();
         }
-#endregion
+        #endregion
 
-#region protected
+        #region protected
         protected virtual void DisplayPrompt()
         {
             Font originalFont = (Font)txtOutput.SelectionFont.Clone();
@@ -251,6 +168,13 @@ namespace CEScriptRunner.Views
             txtOutput.SelectionColor = originalColor;
             txtOutput.SelectionFont = originalFont;
         }
-#endregion
+        #endregion
+
+        #region private
+        private void clearToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            txtOutput.Clear();
+        }
+        #endregion
     }
 }

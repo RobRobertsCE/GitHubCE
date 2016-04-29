@@ -120,17 +120,19 @@
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.txtJiraSearchNumber = new System.Windows.Forms.ToolStripTextBox();
             this.tsbJiraSearch = new System.Windows.Forms.ToolStripButton();
-            this.splitter3 = new System.Windows.Forms.Splitter();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbBuildAssemblies = new System.Windows.Forms.ToolStripButton();
             this.tsbBuildExecutables = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbPull = new System.Windows.Forms.ToolStripButton();
-            this.scriptOutputDisplay1 = new CEScriptRunner.Views.ScriptOutputDisplay();
-            this.txtCommand = new System.Windows.Forms.ToolStripTextBox();
-            this.tsbRunCommand = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbRunCommand = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
+            this.cmbBranches = new System.Windows.Forms.ToolStripComboBox();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.splitter3 = new System.Windows.Forms.Splitter();
+            this.scriptOutputDisplay1 = new CEScriptRunner.Views.ScriptOutputDisplay();
+            this.cboCommand = new System.Windows.Forms.ToolStripComboBox();
             this.ctxListView.SuspendLayout();
             this.pnlTop.SuspendLayout();
             this.pnlAutoProcessSteps.SuspendLayout();
@@ -848,26 +850,24 @@
             this.tsbPullRequests});
             this.toolStrip2.Location = new System.Drawing.Point(3, 25);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(343, 25);
+            this.toolStrip2.Size = new System.Drawing.Size(423, 25);
             this.toolStrip2.TabIndex = 6;
             // 
             // tsbAdvantage
             // 
-            this.tsbAdvantage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbAdvantage.Image = ((System.Drawing.Image)(resources.GetObject("tsbAdvantage.Image")));
+            this.tsbAdvantage.Image = global::GitHubCE.Properties.Resources.default_space_logo_256;
             this.tsbAdvantage.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbAdvantage.Name = "tsbAdvantage";
-            this.tsbAdvantage.Size = new System.Drawing.Size(68, 22);
+            this.tsbAdvantage.Size = new System.Drawing.Size(84, 22);
             this.tsbAdvantage.Text = "Advantage";
             this.tsbAdvantage.Click += new System.EventHandler(this.tsbAdvantage_Click_1);
             // 
             // tsbBamboo
             // 
-            this.tsbBamboo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbBamboo.Image = ((System.Drawing.Image)(resources.GetObject("tsbBamboo.Image")));
+            this.tsbBamboo.Image = global::GitHubCE.Properties.Resources.logoBambooPNG;
             this.tsbBamboo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbBamboo.Name = "tsbBamboo";
-            this.tsbBamboo.Size = new System.Drawing.Size(56, 22);
+            this.tsbBamboo.Size = new System.Drawing.Size(72, 22);
             this.tsbBamboo.Text = "Bamboo";
             this.tsbBamboo.Click += new System.EventHandler(this.tsbBamboo_Click_1);
             // 
@@ -878,21 +878,19 @@
             // 
             // tsbJIRAIssue
             // 
-            this.tsbJIRAIssue.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbJIRAIssue.Image = ((System.Drawing.Image)(resources.GetObject("tsbJIRAIssue.Image")));
+            this.tsbJIRAIssue.Image = global::GitHubCE.Properties.Resources.JIRA;
             this.tsbJIRAIssue.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbJIRAIssue.Name = "tsbJIRAIssue";
-            this.tsbJIRAIssue.Size = new System.Drawing.Size(33, 22);
+            this.tsbJIRAIssue.Size = new System.Drawing.Size(49, 22);
             this.tsbJIRAIssue.Text = "JIRA";
             this.tsbJIRAIssue.Click += new System.EventHandler(this.tsbJIRAIssue_Click_1);
             // 
             // tsbGitHubIssue
             // 
-            this.tsbGitHubIssue.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbGitHubIssue.Image = ((System.Drawing.Image)(resources.GetObject("tsbGitHubIssue.Image")));
+            this.tsbGitHubIssue.Image = global::GitHubCE.Properties.Resources.Git;
             this.tsbGitHubIssue.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbGitHubIssue.Name = "tsbGitHubIssue";
-            this.tsbGitHubIssue.Size = new System.Drawing.Size(49, 22);
+            this.tsbGitHubIssue.Size = new System.Drawing.Size(65, 22);
             this.tsbGitHubIssue.Text = "GitHub";
             this.tsbGitHubIssue.Click += new System.EventHandler(this.tsbGitHubIssue_Click_1);
             // 
@@ -903,11 +901,10 @@
             // 
             // tsbPullRequests
             // 
-            this.tsbPullRequests.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbPullRequests.Image = ((System.Drawing.Image)(resources.GetObject("tsbPullRequests.Image")));
+            this.tsbPullRequests.Image = global::GitHubCE.Properties.Resources.Git_Icon_Black;
             this.tsbPullRequests.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbPullRequests.Name = "tsbPullRequests";
-            this.tsbPullRequests.Size = new System.Drawing.Size(113, 22);
+            this.tsbPullRequests.Size = new System.Drawing.Size(129, 22);
             this.tsbPullRequests.Text = "Open Pull Requests";
             this.tsbPullRequests.Click += new System.EventHandler(this.tsbPullRequests_Click_1);
             // 
@@ -924,12 +921,14 @@
             this.toolStripSeparator4,
             this.tsbPull,
             this.toolStripSeparator8,
-            this.txtCommand,
+            this.cboCommand,
             this.tsbRunCommand,
-            this.toolStripSeparator11});
+            this.toolStripSeparator11,
+            this.cmbBranches,
+            this.toolStripButton1});
             this.tlsSearchToolStrip.Location = new System.Drawing.Point(3, 50);
             this.tlsSearchToolStrip.Name = "tlsSearchToolStrip";
-            this.tlsSearchToolStrip.Size = new System.Drawing.Size(967, 25);
+            this.tlsSearchToolStrip.Size = new System.Drawing.Size(1261, 25);
             this.tlsSearchToolStrip.TabIndex = 7;
             // 
             // toolStripLabel2
@@ -953,18 +952,14 @@
             this.tsbJiraSearch.Text = "Search";
             this.tsbJiraSearch.Click += new System.EventHandler(this.tsbJiraSearch_Click);
             // 
-            // splitter3
+            // toolStripSeparator3
             // 
-            this.splitter3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.splitter3.Location = new System.Drawing.Point(0, 400);
-            this.splitter3.Name = "splitter3";
-            this.splitter3.Size = new System.Drawing.Size(1305, 3);
-            this.splitter3.TabIndex = 9;
-            this.splitter3.TabStop = false;
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
             // tsbBuildAssemblies
             // 
-            this.tsbBuildAssemblies.Image = ((System.Drawing.Image)(resources.GetObject("tsbBuildAssemblies.Image")));
+            this.tsbBuildAssemblies.Image = global::GitHubCE.Properties.Resources.BuildSolution_104_32;
             this.tsbBuildAssemblies.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbBuildAssemblies.Name = "tsbBuildAssemblies";
             this.tsbBuildAssemblies.Size = new System.Drawing.Size(116, 22);
@@ -973,17 +968,12 @@
             // 
             // tsbBuildExecutables
             // 
-            this.tsbBuildExecutables.Image = ((System.Drawing.Image)(resources.GetObject("tsbBuildExecutables.Image")));
+            this.tsbBuildExecutables.Image = global::GitHubCE.Properties.Resources.BuildSolution_104_24;
             this.tsbBuildExecutables.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbBuildExecutables.Name = "tsbBuildExecutables";
             this.tsbBuildExecutables.Size = new System.Drawing.Size(118, 22);
             this.tsbBuildExecutables.Text = "Build Executables";
             this.tsbBuildExecutables.Click += new System.EventHandler(this.tsbBuildExecutables_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
             // toolStripSeparator4
             // 
@@ -999,6 +989,51 @@
             this.tsbPull.Text = "Pull";
             this.tsbPull.Click += new System.EventHandler(this.tsbPull_Click);
             // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tsbRunCommand
+            // 
+            this.tsbRunCommand.Image = global::GitHubCE.Properties.Resources.startwithoutdebugging_6556;
+            this.tsbRunCommand.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbRunCommand.Name = "tsbRunCommand";
+            this.tsbRunCommand.Size = new System.Drawing.Size(108, 22);
+            this.tsbRunCommand.Text = "Run Command";
+            this.tsbRunCommand.Click += new System.EventHandler(this.tsbRunCommand_Click);
+            // 
+            // toolStripSeparator11
+            // 
+            this.toolStripSeparator11.Name = "toolStripSeparator11";
+            this.toolStripSeparator11.Size = new System.Drawing.Size(6, 25);
+            // 
+            // cmbBranches
+            // 
+            this.cmbBranches.Items.AddRange(new object[] {
+            "develop",
+            "master"});
+            this.cmbBranches.Name = "cmbBranches";
+            this.cmbBranches.Size = new System.Drawing.Size(121, 25);
+            // 
+            // toolStripButton1
+            // 
+            this.toolStripButton1.Image = global::GitHubCE.Properties.Resources.BuildSolution_104;
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(171, 22);
+            this.toolStripButton1.Text = "Checkout and Build Branch";
+            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
+            // 
+            // splitter3
+            // 
+            this.splitter3.Dock = System.Windows.Forms.DockStyle.Top;
+            this.splitter3.Location = new System.Drawing.Point(0, 400);
+            this.splitter3.Name = "splitter3";
+            this.splitter3.Size = new System.Drawing.Size(1305, 3);
+            this.splitter3.TabIndex = 9;
+            this.splitter3.TabStop = false;
+            // 
             // scriptOutputDisplay1
             // 
             this.scriptOutputDisplay1.DisplayFont = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1013,30 +1048,12 @@
             this.scriptOutputDisplay1.Size = new System.Drawing.Size(1305, 201);
             this.scriptOutputDisplay1.TabIndex = 10;
             // 
-            // txtCommand
+            // cboCommand
             // 
-            this.txtCommand.AutoSize = false;
-            this.txtCommand.Name = "txtCommand";
-            this.txtCommand.Size = new System.Drawing.Size(250, 25);
-            // 
-            // tsbRunCommand
-            // 
-            this.tsbRunCommand.Image = ((System.Drawing.Image)(resources.GetObject("tsbRunCommand.Image")));
-            this.tsbRunCommand.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbRunCommand.Name = "tsbRunCommand";
-            this.tsbRunCommand.Size = new System.Drawing.Size(108, 22);
-            this.tsbRunCommand.Text = "Run Command";
-            this.tsbRunCommand.Click += new System.EventHandler(this.tsbRunCommand_Click);
-            // 
-            // toolStripSeparator8
-            // 
-            this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripSeparator11
-            // 
-            this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(6, 25);
+            this.cboCommand.AutoSize = false;
+            this.cboCommand.Name = "cboCommand";
+            this.cboCommand.Size = new System.Drawing.Size(250, 25);
+            this.cboCommand.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtCommand_KeyUp);
             // 
             // GitHubHelper
             // 
@@ -1184,9 +1201,11 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripButton tsbPull;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
-        private System.Windows.Forms.ToolStripTextBox txtCommand;
         private System.Windows.Forms.ToolStripButton tsbRunCommand;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
+        private System.Windows.Forms.ToolStripComboBox cmbBranches;
+        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.ToolStripComboBox cboCommand;
     }
 }
 
