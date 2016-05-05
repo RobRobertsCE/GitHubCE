@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="GitHubToken" Type="System.String" Scope="User">
-      <Value Profile="(Default)">6fe51e45b345263511071843b317d4ed3089b3ec</Value>
+      <Value Profile="(Default)">eb023f6c8fd227aa65f22390cd00f0dcd9f6f1c6</Value>
     </Setting>
     <Setting Name="GitHubUserName" Type="System.String" Scope="User">
       <Value Profile="(Default)">RobRobertsCE</Value>

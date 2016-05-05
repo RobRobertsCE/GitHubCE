@@ -78,7 +78,7 @@ namespace GitHubCE
                     foreach (var issue in JiraIssues)
                     {
                         var issueKey = issue.Key.Value;
-                        var issueNumberBuffer = issueKey.Replace("ADVANTAGE-", "");
+                        var issueNumberBuffer = issueKey.Replace("ADVANTAGE-", "").Replace("WEB-", "");
                         var issueNumber = Int32.Parse(issueNumberBuffer);
                         JiraIssueNumbers.Add(issueNumber);
                     }

@@ -184,6 +184,7 @@ namespace GitHubCE
             catch (Exception ex)
             {
                 ExceptionHandler(ex);
+                throw;
             }
         }
         async Task GetPullRequestViewsByJiraNumber(ItemState? state, DateRange searchDates, IList<string> repoNames, string jiraIssueNumber)
@@ -446,40 +447,14 @@ namespace GitHubCE
                 Log(ex.ToString());
             }
             catch { }
+
+            throw ex;
         }
 
         private void Log(string message)
         {
-            using (StreamWriter w = File.AppendText("GitHubCELog.txt"))
-            {
-                Log(message, w);
-            }
-        }
-        public static void Log(string logMessage, TextWriter w)
-        {
-            w.Write("\r\nLog Entry : ");
-            w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
-                DateTime.Now.ToLongDateString());
-            w.WriteLine("  :");
-            w.WriteLine("  :{0}", logMessage);
-            w.WriteLine("-------------------------------");
-        }
-
-        public static void DumpLog()
-        {
-            using (StreamReader r = File.OpenText("GitHubCELog.txt"))
-            {
-                DumpLog(r);
-            }
-        }
-        public static void DumpLog(StreamReader r)
-        {
-            string line;
-            while ((line = r.ReadLine()) != null)
-            {
-                Console.WriteLine(line);
-            }
-        }
+            GitHubCELog.Log(message);
+        }               
         #endregion
     }
 }

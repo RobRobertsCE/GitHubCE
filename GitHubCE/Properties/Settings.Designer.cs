@@ -25,7 +25,7 @@ namespace GitHubCE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("6fe51e45b345263511071843b317d4ed3089b3ec")]
+        [global::System.Configuration.DefaultSettingValueAttribute("eb023f6c8fd227aa65f22390cd00f0dcd9f6f1c6")]
         public string GitHubToken {
             get {
                 return ((string)(this["GitHubToken"]));

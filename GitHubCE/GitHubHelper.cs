@@ -28,6 +28,7 @@ namespace GitHubCE
     public partial class GitHubHelper : Form
     {
         delegate void UpdateDisplayCallback(IList<PullRequestView> pullRequests);
+        delegate void UpdateFormStateCallback(DateTime timestamp);
 
         #region DllImports
         [DllImport("user32.dll")]
@@ -230,7 +231,7 @@ namespace GitHubCE
                         {
                             lvi.BackColor = Color.DarkRed;
                             lvi.ForeColor = Color.LightCyan;
-                            lblWarning.Text = "BUILD.PS1 SCRIPT CHANGE!!!";
+                            lblWarning.Text = request.JiraIssueNumber.ToUpper() +  " HAS BUILD.PS1 SCRIPT CHANGE!!!";
                             lblWarning.BackColor = Color.Red;
                         }
                         else if (request.State == ItemState.Closed)
@@ -942,9 +943,15 @@ namespace GitHubCE
             lblLastUpdate.Text = "Reading requests...";
         }
 
-        private void SetFormStateIdle(DateTime lastUpdate)
+        private void SafeSetFormStateIdle(DateTime timestamp)
         {
-            lblLastUpdate.Text = String.Format("Last Update: {0}", lastUpdate.ToString());
+            UpdateFormStateCallback cb = new UpdateFormStateCallback(SetFormStateIdle);
+            this.Invoke(cb, new object[] { timestamp });
+        }
+
+        private void SetFormStateIdle(DateTime timestamp)
+        {
+            lblLastUpdate.Text = String.Format("Last Update: {0}", timestamp.ToString());
         }
 
         #endregion
@@ -954,9 +961,16 @@ namespace GitHubCE
         {
             _repoNames = JsonConvert.DeserializeObject<List<string>>(Settings.Default.ActiveRepoList);
         }
-        void NotifyNewPullRequest()
+        
+        private void NotifyNewPullRequest()
         {
-            FlashWindow(this.Handle, true);
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new MethodInvoker(() => { NotifyNewPullRequest(); }));
+            }
+            else {
+                FlashWindow(this.Handle, true);
+            }
         }
 
         private void ExceptionHandler(Exception ex)
@@ -978,36 +992,8 @@ namespace GitHubCE
 
         private void Log(string message)
         {
-            using (StreamWriter w = File.AppendText("GitHubCELog.txt"))
-            {
-                Log(message, w);
-            }
-        }
-        public static void Log(string logMessage, TextWriter w)
-        {
-            w.Write("\r\nLog Entry : ");
-            w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
-                DateTime.Now.ToLongDateString());
-            w.WriteLine("  :");
-            w.WriteLine("  :{0}", logMessage);
-            w.WriteLine("-------------------------------");
-        }
-
-        public static void DumpLog()
-        {
-            using (StreamReader r = File.OpenText("GitHubCELog.txt"))
-            {
-                DumpLog(r);
-            }
-        }
-        public static void DumpLog(StreamReader r)
-        {
-            string line;
-            while ((line = r.ReadLine()) != null)
-            {
-                Console.WriteLine(line);
-            }
-        }
+            GitHubCELog.Log(message);          
+        }        
         #endregion
 
         #region GitHubRepo          
@@ -1025,7 +1011,14 @@ namespace GitHubCE
                 // start new thread here
                 await Task.Run(() =>
                 {
-                    _gitHubRepoHelper.GetRequests(state, _daysBack, _repoNames);
+                    try
+                    {
+                        _gitHubRepoHelper.GetRequests(state, _daysBack, _repoNames);
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler(ex);
+                    }
                 });
             }
             catch (Exception ex)
@@ -1072,7 +1065,7 @@ namespace GitHubCE
             {
                 GitHubRepo repo = (GitHubRepo)sender;
                 SafeDisplayPullRequests(repo.PullRequests);
-                SetFormStateIdle(DateTime.Now);
+                SafeSetFormStateIdle(DateTime.Now);
             }
             catch (Exception ex)
             {

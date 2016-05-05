@@ -11,6 +11,7 @@ namespace CEScriptRunner.Views
     public partial class ScriptOutputDisplay : UserControl
     {
         #region properties
+        public bool SuppressBlankLines { get; set; }
         public Color DisplayForeColor
         {
             get
@@ -62,8 +63,9 @@ namespace CEScriptRunner.Views
         #region public
         public void AppendTextBold(string line, Color? foreColor)
         {
+            if (SuppressBlankLines && String.IsNullOrEmpty(line))
+                return;
             txtOutput.DeselectAll();
-            DisplayPrompt();
             Font originalFont = (Font)txtOutput.SelectionFont.Clone();
             txtOutput.SelectionFont = new Font(txtOutput.SelectionFont, FontStyle.Bold);
             if (foreColor.HasValue)
@@ -77,8 +79,9 @@ namespace CEScriptRunner.Views
 
         public void AppendText(string line, Color? foreColor)
         {
+            if (SuppressBlankLines && String.IsNullOrEmpty(line))
+                return;
             txtOutput.DeselectAll();
-            DisplayPrompt();
             if (foreColor.HasValue)
                 txtOutput.SelectionColor = foreColor.Value;
             txtOutput.AppendText(line);
@@ -89,11 +92,15 @@ namespace CEScriptRunner.Views
 
         public void AppendText(string line)
         {
+            if (SuppressBlankLines && String.IsNullOrEmpty(line))
+                return;
             AppendText(line, null);
         }
 
         public void AppendLineBold(string line, Color? foreColor)
         {
+            if (SuppressBlankLines && String.IsNullOrEmpty(line))
+                return;
             AppendTextBold(line + "\r\n", foreColor);
         }
 
@@ -104,15 +111,21 @@ namespace CEScriptRunner.Views
 
         public void AppendLine(string line)
         {
+            if (SuppressBlankLines && String.IsNullOrEmpty(line))
+                return;
             AppendText(line + "\r\n", null);
         }
 
         public void AppendWarning(string line)
         {
+            if (SuppressBlankLines && String.IsNullOrEmpty(line))
+                return;
             AppendLineBold(line + "\r\n", Color.Yellow);
         }
         public void AppendCommand(string line)
         {
+            if (SuppressBlankLines && String.IsNullOrEmpty(line))
+                return;
             AppendLineBold(line + "\r\n", Color.Teal);
         }
         public void AppendError(string line)
@@ -133,10 +146,15 @@ namespace CEScriptRunner.Views
             txtOutput.SelectAll();
             txtOutput.Copy();
         }
+
+        public void DisplayPrompt()
+        {
+            DisplayLinePrompt();
+        }
         #endregion
 
         #region protected
-        protected virtual void DisplayPrompt()
+        protected virtual void DisplayLinePrompt()
         {
             Font originalFont = (Font)txtOutput.SelectionFont.Clone();
             Color originalColor = DisplayForeColor;

@@ -86,6 +86,7 @@ namespace CEScriptRunner
         {
             this.Display = display;
             this.Display.Prompt = prompt;
+            this.Display.SuppressBlankLines = true;
             SetWorkingDirectory(startupDirectory);
         }
         #endregion
@@ -107,7 +108,7 @@ namespace CEScriptRunner
         }
         public void AddBlankLine()
         {
-            _display.AppendLine("");
+            _display.DisplayPrompt();
         }
         public void StartScript(string command)
         {

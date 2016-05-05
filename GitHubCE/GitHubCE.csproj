@@ -88,6 +88,7 @@
     <Compile Include="Forms\PatchFileMoverDialog.Designer.cs">
       <DependentUpon>PatchFileMoverDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="GitHubCELog.cs" />
     <Compile Include="GitHubHelper.cs">
       <SubType>Form</SubType>
     </Compile>

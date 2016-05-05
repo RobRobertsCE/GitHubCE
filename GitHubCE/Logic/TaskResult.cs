@@ -34,6 +34,15 @@ namespace GitHubCE.Logic
             Errors.Add(message);
             IsValid = false;
         }
+        public void AddErrors(IList<string> errors)
+        {
+            if (null == errors || errors.Count == 0) return;
+
+            foreach (var errorMessage in errors)
+            {
+                AddError(errorMessage);
+            }
+        }
         public void AddDebug(string message)
         {
             DebugMessages.Add(message);
