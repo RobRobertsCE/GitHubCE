@@ -58,7 +58,7 @@ namespace GitHubCE.Advantage
             this.WinUserName = winUser;
             this.PullRequest = pullRequest;
             this.RepoName = pullRequest.RepoName;
-            _changedFiles = pullRequest.Files;
+            _changedFiles = pullRequest.Files.Where(f=>!f.Contains("UnitTest")).ToList();
             _assemblies = GetAssemblyList();
         }
         #endregion

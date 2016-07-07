@@ -114,15 +114,11 @@ namespace CEScriptRunner
         {
             StopScript();
             VerifyDirectory();
-            string fullPathCommand = String.Empty;
+            string fullPathCommand;
             if (command.StartsWith(@".\"))
-            {
                 fullPathCommand = command.Replace(@".\", _workingDirectory + "\\");
-            }
             else
-            {
                 fullPathCommand = command;
-            }
             _pipelineExecutor = new PipelineExecutor(_runSpace, _display, fullPathCommand);
             _pipelineExecutor.OnDataReady += new PipelineExecutor.DataReadyDelegate(pipelineExecutor_OnDataReady);
             _pipelineExecutor.OnDataEnd += new PipelineExecutor.DataEndDelegate(pipelineExecutor_OnDataEnd);
@@ -204,7 +200,11 @@ namespace CEScriptRunner
         {
             foreach (object e in data)
             {
-                _display.AppendError("Error : " + e.ToString());
+                var message = e.ToString();
+                if (message.ToUpper().Contains("ERROR"))
+                    _display.AppendError(message);
+                else
+                    _display.AppendInfo(message);
             }
             _display.AppendLine("");
         }

@@ -67,19 +67,7 @@ namespace GitHubCE
                 return _pullRequests;
             }
         }
-
-        BranchVersionHelper _branchHelper;
-        public BranchVersionHelper BranchHelper
-        {
-            get
-            {
-                if (null == _branchHelper)
-                    _branchHelper = new BranchVersionHelper();
-
-                return _branchHelper;
-            }
-        }
-
+        
         JiraIssueHelper _jiraHelper;
         public JiraIssueHelper JiraHelper
         {
@@ -153,13 +141,21 @@ namespace GitHubCE
                     var pullRequest = PullRequests.FirstOrDefault(r => r.Id == request.Number);
                     if (null == pullRequest)
                     {
-                        pullRequest = GetNewPullRequestView(request);
-                        // Get detailed info on each Pull Request.
-                        pullRequest = await GetPullRequestDetails(request, pullRequest);
+                        try
+                        {
+                            pullRequest = GetNewPullRequestView(request);
+                            // Get detailed info on each Pull Request.
+                            pullRequest = await GetPullRequestDetails(request, pullRequest);
 
-                        PullRequests.Add(pullRequest);
-                        if (pullRequest.State == ItemState.Open)
-                            hasNewRequests = true;
+                            PullRequests.Add(pullRequest);
+                            if (pullRequest.State == ItemState.Open)
+                                hasNewRequests = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            ExceptionHandler(ex);
+                        }
+                     
                     }
                     else // already had a copy in our list.. update it
                     {
@@ -263,7 +259,8 @@ namespace GitHubCE
             var pullRequestDetails = await Client.Repository.PullRequest.Get(_owner, pullRequest.RepoName, pullRequest.Id);
 
             pullRequest.Branch = pullRequestDetails.Base.Ref;
-            pullRequest.Version = BranchHelper.Map.GetVersion(pullRequest.Branch);
+            pullRequest.RepoBranch = BranchVersionHelper.Map.GetRepoBranch(pullRequest.Branch);
+            pullRequest.Version = pullRequest.RepoBranch.Version;
             pullRequest.Mergeable = pullRequestDetails.Mergeable;
             pullRequest.Merged = pullRequestDetails.Merged;
             pullRequest.ChangedFileCount = pullRequestDetails.ChangedFiles;
@@ -363,11 +360,19 @@ namespace GitHubCE
             var jiraIssueNumbers = GetJiraIssueNumbers(titleAndBody);
             foreach (var jiraIssueNumber in jiraIssueNumbers)
             {
-                var jiraIssue = JiraHelper.GetJiraIssueByKey(jiraIssueNumber);
-                if (null != jiraIssue)
+                try
                 {
-                    jiraIssues.Add(jiraIssue);
+                    var jiraIssue = JiraHelper.GetJiraIssueByKey(jiraIssueNumber);
+                    if (null != jiraIssue)
+                    {
+                        jiraIssues.Add(jiraIssue);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception reading JIRA issue with key " + jiraIssueNumber + ": " + ex.ToString());
+                }
+                
             }
             return jiraIssues;
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -9,8 +8,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Octokit;
 using JiraCE;
-using DbVersionLibrary;
-using System.IO;
 using System.Diagnostics;
 using GitHubCE.Properties;
 using Newtonsoft.Json;
@@ -18,17 +15,16 @@ using System.Collections;
 using GitHubCE.Advantage;
 using System.Management.Automation;
 using System.Collections.ObjectModel;
-using System.Threading;
-using System.Management.Automation.Runspaces;
 using GitHubCE.Forms;
 using CEScriptRunner;
+using PfsConnectMonitor;
 
 namespace GitHubCE
 {
     public partial class GitHubHelper : Form
     {
-        delegate void UpdateDisplayCallback(IList<PullRequestView> pullRequests);
-        delegate void UpdateFormStateCallback(DateTime timestamp);
+        private delegate void UpdateDisplayCallback(IList<PullRequestView> pullRequests);
+        private delegate void UpdateFormStateCallback(DateTime timestamp);
 
         #region DllImports
         [DllImport("user32.dll")]
@@ -36,64 +32,33 @@ namespace GitHubCE
         #endregion
 
         #region Fields      
-        private bool _messageBoxIsDisplayed = false;
-        GitHubCommit _commit = null;
-        Dictionary<string, GitHubRepo> Repos = new Dictionary<string, GitHubRepo>();
+        StringBuilder _powershellStringBuilder;
+        private bool _messageBoxIsDisplayed;
+        GitHubCommit _commit;
+        readonly Dictionary<string, GitHubRepo> _repos = new Dictionary<string, GitHubRepo>();
         IList<string> _repoNames;
         bool _formLoading = true;
-        ListViewColumnSorter lvwColumnSorter;
-        GitHubRepo _gitHubRepoHelper = null;
-        int _daysBack = 0;
-        PSScriptRunner psRunner;
+        readonly ListViewColumnSorter _lvwColumnSorter;
+        GitHubRepo _gitHubRepoHelper;
+        int _daysBack;
+        PSScriptRunner _psRunner;
         #endregion
 
         #region Properties
-        private GitHubClient _client = null;
-        public GitHubClient Client
+        private GitHubClient _client;
+        public GitHubClient Client => _client ?? (_client = new GitHubClient(new ProductHeaderValue("CE.GitHub.Helper"))
         {
-            get
-            {
-                if (null == _client)
-                {
-                    _client = new GitHubClient(new ProductHeaderValue("CE.GitHub.Helper"));
-                    _client.Credentials = new Credentials(Settings.Default.GitHubUserName, Settings.Default.GitHubToken);
-                }
-                return _client;
-            }
-        }
+            Credentials = new Credentials(Settings.Default.GitHubUserName, Settings.Default.GitHubToken)
+        });
 
-        private IList<PullRequestView> _pullRequests = new List<PullRequestView>();
-        public IList<PullRequestView> PullRequests
-        {
-            get
-            {
-                return _pullRequests;
-            }
-        }
-
-        BranchVersionHelper _branchHelper;
-        public BranchVersionHelper BranchHelper
-        {
-            get
-            {
-                if (null == _branchHelper)
-                    _branchHelper = new BranchVersionHelper();
-
-                return _branchHelper;
-            }
-        }
+        public IList<PullRequestView> PullRequests { get; } = new List<PullRequestView>();
 
         JiraIssueHelper _jiraHelper;
-        public JiraIssueHelper JiraHelper
-        {
-            get
-            {
-                if (null == _jiraHelper)
-                    _jiraHelper = new JiraIssueHelper(Settings.Default.JiraUrl, Settings.Default.JiraUserName, Settings.Default.JiraUserPassword);
+        public JiraIssueHelper JiraHelper => _jiraHelper ??
+                                             (_jiraHelper =
+                                                 new JiraIssueHelper(Settings.Default.JiraUrl, Settings.Default.JiraUserName,
+                                                     Settings.Default.JiraUserPassword));
 
-                return _jiraHelper;
-            }
-        }
         #endregion
 
         #region ctor/Load
@@ -104,17 +69,18 @@ namespace GitHubCE
 
             // Create an instance of a ListView column sorter and assign it 
             // to the ListView control.
-            lvwColumnSorter = new ListViewColumnSorter();
-            this.lvPullRequests.ListViewItemSorter = lvwColumnSorter;
+            _lvwColumnSorter = new ListViewColumnSorter();
+            lvPullRequests.ListViewItemSorter = _lvwColumnSorter;
         }
         private void GitHubHelper_Load(object sender, EventArgs e)
         {
-            psRunner = new PSScriptRunner(scriptOutputDisplay1, "{dir}>", @"C:\users\rroberts\source\repos\advantage");
-            psRunner.ScriptComplete += PsRunner_ScriptComplete;
-            psRunner.RequestComplete += PsRunner_RequestComplete;
+            _psRunner = new PSScriptRunner(scriptOutputDisplay1, "{dir}>", @"C:\users\rroberts\source\repos\advantage");
+            _psRunner.ScriptComplete += PsRunner_ScriptComplete;
+            _psRunner.RequestComplete += PsRunner_RequestComplete;
             LoadOptions();
             _formLoading = false;
-            psRunner.AddBlankLine();
+            _psRunner.AddBlankLine();
+            UpdateCurrentBranch();
         }
 
         private void PsRunner_RequestComplete(object sender, string data)
@@ -129,6 +95,8 @@ namespace GitHubCE
             cboDaysBack.SelectedIndex = 0;
             showOpenRequestsToolStripMenuItem.Checked = Settings.Default.ShowOpenRequests;
             showClosedRequestsToolStripMenuItem.Checked = Settings.Default.ShowClosedRequests;
+            showAMSToolStripMenuItem.Checked = Settings.Default.ShowAMSTeam;
+            showRDToolStripMenuItem.Checked = Settings.Default.ShowRDTeam;
             LoadRepoNamesList();
         }
         #endregion
@@ -190,109 +158,156 @@ namespace GitHubCE
         }
         void DisplayPullRequests(IList<PullRequestView> requests)
         {
-            if (this.lvPullRequests.InvokeRequired)
+            try
             {
-                UpdateDisplayCallback cb = new UpdateDisplayCallback(DisplayPullRequests);
-                this.Invoke(cb, new object[] { requests });
-            }
-
-            foreach (var request in requests.OrderBy(r => r.Updated))
-            {
-                if (request.State == ItemState.Open && Settings.Default.ShowOpenRequests || request.State != ItemState.Open && Settings.Default.ShowClosedRequests)
+                if (this.lvPullRequests.InvokeRequired)
                 {
-                    ListViewItem match = null;
-                    foreach (ListViewItem lvi in lvPullRequests.Items)
+                    UpdateDisplayCallback cb = new UpdateDisplayCallback(DisplayPullRequests);
+                    this.Invoke(cb, new object[] { requests });
+                }
+
+                foreach (var request in requests.OrderBy(r => r.Updated))
+                {
+                    if (request.JiraIssues.Count > 0)// && request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS")
                     {
-                        if (((PullRequestView)lvi.Tag).Id == request.Id)
+                        if ((request.State == ItemState.Open && Settings.Default.ShowOpenRequests || request.State != ItemState.Open && Settings.Default.ShowClosedRequests) &&
+                            (((request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS" || request.Developer == "brantburnett") && showAMSToolStripMenuItem.Checked) ||
+                            (request.JiraIssues[0].CustomFields["Team"].Values[0] == "R&D" && showRDToolStripMenuItem.Checked)))
                         {
-                            match = lvi;
-                            break;
-                        }
-                    }
-                    if (null == match)
-                    {
-                        // add a new item.
-                        var lvi = new ListViewItem(new string[] {
-                            request.Id.ToString(),
-                            request.RepoName,
-                            request.Updated.ToLocalTime().ToString(),
-                            request.Title,
-                            request.JiraIssueKeyList, // request.JiraIssueNumber,
-                            request.Branch,
-                            request.Version.ToString(),
-                            request.HasDbUpgrade ? "** YES **":"",
-                            request.State.ToString(),
-                            request.Developer,
-                            request.JiraIssueStatus});
-
-                        lvi.UseItemStyleForSubItems = true;
-
-                        if (request.HasBuildScriptChange)
-                        {
-                            lvi.BackColor = Color.DarkRed;
-                            lvi.ForeColor = Color.LightCyan;
-                            lblWarning.Text = request.JiraIssueNumber.ToUpper() +  " HAS BUILD.PS1 SCRIPT CHANGE!!!";
-                            lblWarning.BackColor = Color.Red;
-                        }
-                        else if (request.State == ItemState.Closed)
-                        {
-                            lvi.ForeColor = Color.DimGray;
-                        }
-                        else
-                        {
-                            if (request.Branch == "develop")
+                            ListViewItem match = null;
+                            foreach (ListViewItem lvi in lvPullRequests.Items)
                             {
-                                lvi.ForeColor = Color.Blue;
+                                if (((PullRequestView)lvi.Tag).Id == request.Id)
+                                {
+                                    match = lvi;
+                                    break;
+                                }
                             }
-
-                            if (request.HasDbUpgrade)
+                            if (null == match)
                             {
-                                lvi.ForeColor = Color.Red;
+                                // add a new item.
+                                var lvi = new ListViewItem(new string[] {
+                                    request.JiraIssues[0].CustomFields["Team"].Values[0],
+                                    request.Id.ToString(),
+                                    request.RepoName,
+                                    request.Updated.ToLocalTime().ToString(),
+                                    request.Title,
+                                    request.JiraIssueKeyList, // request.JiraIssueNumber,
+                                    request.Branch,
+                                    request.Version.ToString(),
+                                    request.FixVersions,
+                                    request.HasDbUpgrade ? "** YES **":"",
+                                    request.State.ToString(),
+                                    request.Developer,
+                                    request.JiraIssueStatus});
+
+                                lvi.UseItemStyleForSubItems = true;
+
+                                if (request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS" || request.Developer == "brantburnett")
+                                {
+                                    // *** Formatting - AMS *** //
+
+                                    if (request.HasBuildScriptChange)
+                                    {
+                                        lvi.BackColor = Color.DarkRed;
+                                        lvi.ForeColor = Color.LightCyan;
+                                        lblWarning.Text = request.JiraIssueNumber.ToUpper() + " HAS BUILD.PS1 SCRIPT CHANGE!!!";
+                                        lblWarning.BackColor = Color.Red;
+                                    }
+                                    else if (request.State == ItemState.Closed)
+                                    {
+                                        lvi.UseItemStyleForSubItems = true;
+                                        lvi.ForeColor = Color.DimGray;
+                                    }
+                                    else
+                                    {
+                                        lvi.UseItemStyleForSubItems = false;
+                                        if (request.Branch != "develop")
+                                        {
+                                            lvi.SubItems[6].ForeColor = Color.Blue;
+                                        }
+
+                                        if (request.HasDbUpgrade)
+                                        {
+                                            lvi.SubItems[9].BackColor = Color.Orange;
+                                        }
+
+                                        if (!request.VersionIsValid)
+                                        {
+                                            lvi.SubItems[8].BackColor = Color.Red;
+                                            lvi.SubItems[7].BackColor = Color.Red;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // *** Formatting - R&D *** //
+                                    lvi.ForeColor = Color.Gray;
+                                    lvi.BackColor = Color.WhiteSmoke;
+                                }
+                                lvi.Tag = request;
+                                lvPullRequests.Items.Add(lvi);
+                            }
+                            else
+                            {
+                                // update existing item.
+                                match.SubItems.Clear();
+                                match.Text = request.Id.ToString();
+                                match.SubItems.AddRange(new string[] {
+                                    request.JiraIssues[0].CustomFields["Team"].Values[0],
+                                    request.RepoName,
+                                    request.Updated.ToLocalTime().ToString(),
+                                    request.Title,
+                                    request.JiraIssueKeyList, // request.JiraIssueNumber,
+                                    request.Branch,
+                                    request.Version.ToString(),
+                                    request.FixVersions,
+                                    request.HasDbUpgrade ? "** YES **":"",
+                                    request.State.ToString(),
+                                    request.Developer,
+                                    request.JiraIssueStatus});
+                                if (request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS" || request.Developer == "brantburnett")
+                                {
+                                    if (request.State == ItemState.Closed)
+                                    {
+                                        match.UseItemStyleForSubItems = true;
+                                        match.ForeColor = Color.DimGray;
+                                    }
+                                    else
+                                    {
+                                        match.UseItemStyleForSubItems = false;
+                                        if (request.Branch != "develop")
+                                        {
+                                            match.SubItems[6].ForeColor = Color.Blue;
+                                        }
+
+                                        if (request.HasDbUpgrade)
+                                        {
+                                            match.SubItems[9].BackColor = Color.Orange;
+                                        }
+
+                                        if (!request.VersionIsValid)
+                                        {
+                                            match.SubItems[8].BackColor = Color.Red;
+                                            match.SubItems[7].BackColor = Color.Red;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // *** Formatting - R&D *** //
+                                    match.ForeColor = Color.Gray;
+                                    match.BackColor = Color.WhiteSmoke;
+                                }
+                                match.Tag = request;
                             }
                         }
-
-                        lvi.Tag = request;
-
-                        lvPullRequests.Items.Add(lvi);
-                    }
-                    else
-                    {
-                        // update existing item.
-                        match.SubItems.Clear();
-                        match.Text = request.Id.ToString();
-                        match.SubItems.AddRange(new string[] {
-                        request.RepoName,
-                        request.Updated.ToLocalTime().ToString(),
-                        request.Title,
-                        request.JiraIssueKeyList, // request.JiraIssueNumber,
-                        request.Branch,
-                        request.Version.ToString(),
-                        request.HasDbUpgrade ? "** YES **":"",
-                        request.State.ToString(),
-                        request.Developer,
-                        request.JiraIssueStatus});
-
-                        match.UseItemStyleForSubItems = true;
-                        if (request.State == ItemState.Closed)
-                        {
-                            match.ForeColor = Color.DimGray;
-                        }
-                        else
-                        {
-                            if (request.Branch == "develop")
-                            {
-                                match.ForeColor = Color.Blue;
-                            }
-
-                            if (request.HasDbUpgrade)
-                            {
-                                match.ForeColor = Color.Red;
-                            }
-                        }
-
-                        match.Tag = request;
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
             }
         }
 
@@ -554,23 +569,23 @@ namespace GitHubCE
         private void lvPullRequests_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             // Determine if clicked column is already the column that is being sorted.
-            if (e.Column == lvwColumnSorter.SortColumn)
+            if (e.Column == _lvwColumnSorter.SortColumn)
             {
                 // Reverse the current sort direction for this column.
-                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                if (_lvwColumnSorter.Order == SortOrder.Ascending)
                 {
-                    lvwColumnSorter.Order = SortOrder.Descending;
+                    _lvwColumnSorter.Order = SortOrder.Descending;
                 }
                 else
                 {
-                    lvwColumnSorter.Order = SortOrder.Ascending;
+                    _lvwColumnSorter.Order = SortOrder.Ascending;
                 }
             }
             else
             {
                 // Set the column number that is to be sorted; default to ascending.
-                lvwColumnSorter.SortColumn = e.Column;
-                lvwColumnSorter.Order = SortOrder.Ascending;
+                _lvwColumnSorter.SortColumn = e.Column;
+                _lvwColumnSorter.Order = SortOrder.Ascending;
             }
 
             // Perform the sort with these new sort options.
@@ -655,7 +670,9 @@ namespace GitHubCE
                     PullRequestView request = (PullRequestView)lvPullRequests.SelectedItems[0].Tag;
                     var assemblyHelper = new PullRequestAssembyHelper(request, "rroberts");
                     var targetVersion = request.Version;
-                    var patchHelper = new PatchHelper(assemblyHelper, targetVersion);
+
+                    //var patchHelper = new PatchHelper(assemblyHelper, targetVersion);
+                    var patchHelper = new PatchHelper(assemblyHelper, request.RepoBranch);
 
                     var dialog = new PatchFileMoverDialog(patchHelper);
                     dialog.ShowDialog(this);
@@ -678,10 +695,6 @@ namespace GitHubCE
             txtAutoProcess.Copy();
         }
 
-        private void dllsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            BuildDlls();
-        }
         void BuildDlls()
         {
             try
@@ -700,7 +713,7 @@ namespace GitHubCE
                     // invoke execution on the pipeline (collecting output)
                     Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
 
-                    powershellStringBuilder = new StringBuilder();
+                    _powershellStringBuilder = new StringBuilder();
                     // loop through each output object item
                     foreach (PSObject outputItem in PSOutput)
                     {
@@ -710,10 +723,10 @@ namespace GitHubCE
                         {
                             //TODO: do something with the output item 
                             // outputItem.BaseOBject
-                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
+                            _powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
                         }
                     }
-                    var scriptOutput = powershellStringBuilder.ToString();
+                    var scriptOutput = _powershellStringBuilder.ToString();
 
                     Console.WriteLine(scriptOutput);
                     txtAutoProcess.Text += scriptOutput;
@@ -731,11 +744,7 @@ namespace GitHubCE
 
             Console.WriteLine("Done");
         }
-        private void executablesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            BuildExecutables();
-        }
-        StringBuilder powershellStringBuilder = null;
+
         void BuildExecutables()
         {
             try
@@ -755,7 +764,7 @@ namespace GitHubCE
                     // invoke execution on the pipeline (collecting output)
                     Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
 
-                    powershellStringBuilder = new StringBuilder();
+                    _powershellStringBuilder = new StringBuilder();
                     // loop through each output object item
                     foreach (PSObject outputItem in PSOutput)
                     {
@@ -765,10 +774,10 @@ namespace GitHubCE
                         {
                             //TODO: do something with the output item 
                             // outputItem.BaseOBject
-                            powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
+                            _powershellStringBuilder.AppendLine(outputItem.BaseObject.ToString());
                         }
                     }
-                    var scriptOutput = powershellStringBuilder.ToString();
+                    var scriptOutput = _powershellStringBuilder.ToString();
 
                     Console.WriteLine(scriptOutput);
                     txtAutoProcess.Text += scriptOutput;
@@ -795,7 +804,6 @@ namespace GitHubCE
         {
             try
             {
-                GitHubCE.Logic.DbVersionHelper versionHelper = new GitHubCE.Logic.DbVersionHelper("ADVANTAGE", "rroberts");
                 DbVersionDialog dialog = new DbVersionDialog();
                 dialog.ShowDialog();
             }
@@ -869,7 +877,7 @@ namespace GitHubCE
                 if (settings.ShowDialog() == DialogResult.OK)
                 {
                     // clear the repos so they use the new settings.
-                    Repos.Clear();
+                    _repos.Clear();
                     // reload the list of repos.
                     LoadRepoNamesList();
                 }
@@ -961,7 +969,7 @@ namespace GitHubCE
         {
             _repoNames = JsonConvert.DeserializeObject<List<string>>(Settings.Default.ActiveRepoList);
         }
-        
+
         private void NotifyNewPullRequest()
         {
             if (this.InvokeRequired)
@@ -992,8 +1000,8 @@ namespace GitHubCE
 
         private void Log(string message)
         {
-            GitHubCELog.Log(message);          
-        }        
+            GitHubCELog.Log(message);
+        }
         #endregion
 
         #region GitHubRepo          
@@ -1002,6 +1010,9 @@ namespace GitHubCE
             try
             {
                 SetFormStateBusy();
+
+                UpdateCurrentBranch();
+
                 if (null == _gitHubRepoHelper)
                 {
                     _gitHubRepoHelper = new GitHubRepo(Settings.Default.GitHubRepoOwner, Settings.Default.GitHubUserName, Settings.Default.GitHubToken);
@@ -1092,6 +1103,28 @@ namespace GitHubCE
             if (_formLoading) return;
 
             Settings.Default.ShowClosedRequests = showClosedRequestsToolStripMenuItem.Checked;
+            Settings.Default.Save();
+            ClearRequests();
+            ClearRequestDetails();
+            ReloadRequests();
+        }
+
+        private void showAMSToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_formLoading) return;
+
+            Settings.Default.ShowAMSTeam = showAMSToolStripMenuItem.Checked;
+            Settings.Default.Save();
+            ClearRequests();
+            ClearRequestDetails();
+            ReloadRequests();
+        }
+
+        private void showRDToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_formLoading) return;
+
+            Settings.Default.ShowRDTeam = showRDToolStripMenuItem.Checked;
             Settings.Default.Save();
             ClearRequests();
             ClearRequestDetails();
@@ -1210,7 +1243,7 @@ namespace GitHubCE
         {
             try
             {
-                psRunner.StartScript(@".\tools\build\build -Target Executables");
+                _psRunner.StartScript(@".\tools\build\build -Target Executables");
             }
             catch (Exception ex)
             {
@@ -1222,7 +1255,7 @@ namespace GitHubCE
         {
             try
             {
-                psRunner.StartScript(@".\tools\build\build.ps1");
+                _psRunner.StartScript(@".\tools\build\build.ps1");
             }
             catch (Exception ex)
             {
@@ -1238,7 +1271,7 @@ namespace GitHubCE
                 //commands.Add(@"git checkout develop");
                 //commands.Add(@"git pull");
                 //RunCommandList(commands);
-                psRunner.GetCurrentBranch();
+                _psRunner.GetCurrentBranch();
             }
             catch (Exception ex)
             {
@@ -1273,7 +1306,7 @@ namespace GitHubCE
             if (_commandList.Count > _currentCommandIdx)
             {
                 var command = _commandList[_currentCommandIdx];
-                psRunner.StartScript(command);
+                _psRunner.StartScript(command);
             }
             else
             {
@@ -1338,7 +1371,7 @@ namespace GitHubCE
                 commands.Add(@".\tools\build\build.ps1");
 
                 RunCommandList(commands);
-                
+
             }
             catch (Exception ex)
             {
@@ -1348,17 +1381,82 @@ namespace GitHubCE
 
         #endregion
 
-        //private void toolStripButton1_Click(object sender, EventArgs e)
-        //{
-        //    try
-        //    {
-        //        var jira = new JiraIssueHelper(Settings.Default.JiraUrl, Settings.Default.JiraUserName, Settings.Default.JiraUserPassword);
-        //        jira.GetJiraProjects();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ExceptionHandler(ex);
-        //    }          
-        //}
+        #region current branch
+        void UpdateCurrentBranch()
+        {
+            CurrentBranch = BranchVersionHelper.CurrentBranch;
+            if (null!= CurrentBranch)
+            {
+                lblBranchName.Text = CurrentBranch.Name;
+                lblCurrentVersion.Text = CurrentBranch.Version.ToString();
+                lblFileVersion.Text = BranchVersionHelper.CurrentVersion.ToString();
+            }
+          else
+            {
+                lblBranchName.Text = "NONE";
+                lblCurrentVersion.Text = "NOPE";
+                lblFileVersion.Text = "NADA";
+            }
+        }
+
+        public RepoBranch CurrentBranch { get; set; }
+
+        #endregion
+
+        private void buildFileReferenceMapperToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisplayBuildReferenceMapper();
+        }
+
+        void DisplayBuildReferenceMapper()
+        {
+            try
+            {
+                var buildRefMapper = new BuildReferenceMapper.BuildReferencesForm();
+                buildRefMapper.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+
+        private void updateCurrentBranchToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            UpdateCurrentBranch();
+        }
+
+        private void dllsToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            BuildDlls();
+        }
+
+        private void executablesToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            BuildExecutables();
+        }
+
+        private void commitMessageBuilderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DisplayCommitMessagehelper();
+        }
+        void DisplayCommitMessagehelper()
+        {
+            try
+            {
+                var commitBuilder = new JiraCE.CommitMessageHelper();
+                commitBuilder.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
+        }
+
+        private void pFSConnectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var pHandler = new PfsConnectionHandler();
+            Console.WriteLine(pHandler.ToString());
+        }
     }
 }

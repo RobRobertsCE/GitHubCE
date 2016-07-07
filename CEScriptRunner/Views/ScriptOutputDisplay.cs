@@ -135,6 +135,13 @@ namespace CEScriptRunner.Views
             Console.WriteLine(line);
 #endif
         }
+        public void AppendInfo(string line)
+        {
+            AppendLineBold(line, Color.Gray);
+#if (DEBUG)
+            Console.WriteLine(line);
+#endif
+        }
 
         public void ClearOutput()
         {

@@ -7,7 +7,6 @@ using System.IO;
 
 namespace GitHubCE.Advantage
 {
-
     public class PatchHelper
     {
         #region consts
@@ -28,6 +27,9 @@ namespace GitHubCE.Advantage
         #region properties
         public PullRequestAssembyHelper AssemblyHelper { get; private set; }
         public Version PatchTargetVersion { get; set; }
+
+        public RepoBranch Branch { get; set; }
+
         public DateTime BuildTimestampLimit { get; set; }
         #endregion
 
@@ -93,7 +95,7 @@ namespace GitHubCE.Advantage
         {
             get
             {
-                if (null== _sourceAssemblies)
+                if (null == _sourceAssemblies)
                     _sourceAssemblies = GetSourceAssmeblies();
                 return _sourceAssemblies;
             }
@@ -101,16 +103,61 @@ namespace GitHubCE.Advantage
         #endregion
 
         #region ctor       
-        public PatchHelper(PullRequestAssembyHelper assemblyHelper, Version patchTargetVersion)
+        //public PatchHelper(PullRequestAssembyHelper assemblyHelper, Version patchTargetVersion)
+        //{
+        //    this.AssemblyHelper = assemblyHelper;
+        //    this.PatchTargetVersion = patchTargetVersion;
+        //    this.BuildTimestampLimit = AssemblyHelper.PullRequest.Updated.DateTime.ToLocalTime();
+        //    _startupTimestamp = DateTime.Now;
+        //}
+        public PatchHelper(PullRequestAssembyHelper assemblyHelper, RepoBranch branch)
         {
             this.AssemblyHelper = assemblyHelper;
-            this.PatchTargetVersion = patchTargetVersion;
+            this.Branch = branch;
+            this.PatchTargetVersion = branch.Version;
             this.BuildTimestampLimit = AssemblyHelper.PullRequest.Updated.DateTime.ToLocalTime();
             _startupTimestamp = DateTime.Now;
+            if (!ValidatePatchVersion())
+            {
+                throw new Exception("Currently checked out branch does not need to be patched for this JIRA issue.");
+            }
         }
         #endregion
 
         #region private
+        bool ValidatePatchVersion()
+        {
+            bool okToPatch = false;
+            if (BranchVersionHelper.CurrentBranch.Name == "develop")
+            {
+                return okToPatch;// false... develop branch does not get patched!
+            }
+
+            // check the current repo branch that is currently checked out.
+            if (BranchVersionHelper.CurrentBranch.Name == this.Branch.Name)
+            {
+                okToPatch = true;
+            }
+            else
+            {
+                var parent = this.Branch.Parent;
+                while (null != parent)
+                {
+                    if (BranchVersionHelper.CurrentBranch.Name == parent.Name)
+                    {
+                        // OK to patch
+                        okToPatch = true;
+                        break;
+                    }
+                    else
+                    {
+                        parent = parent.Parent;
+                    }
+                }
+            }
+            return okToPatch;
+        }
+
         public TaskResult ValidatePatchProcess()
         {
             var result = new TaskResult() { IsValid = true };
@@ -124,20 +171,25 @@ namespace GitHubCE.Advantage
 
             try
             {
+
                 // repo at the correct version?
-                if (PatchTargetVersion.Build == -1 && PatchTargetVersion.Revision == -1)
+                if (!ValidatePatchVersion())
                 {
-                    if (RepoVersion.Major != PatchTargetVersion.Major || RepoVersion.Minor != PatchTargetVersion.Minor)
-                    {
-                        result.AddError(String.Format("Repo version, {0}, does match patch target version, {1}.", RepoVersion.ToString(), PatchTargetVersion.ToString()));
-                        // no further validation may be done. Bail...
-                        return result;
-                    }
-                    else
-                    {
-                        PatchTargetVersion = RepoVersion;
-                    }
+                    result.AddError(String.Format("Repo version, {0} - {1}, does match patch target version(s), {2} - {3}.", BranchVersionHelper.CurrentBranch.Name, RepoVersion.ToString(), this.Branch.Name, PatchTargetVersion.ToString()));                          
                 }
+                //if (PatchTargetVersion.Build == -1 && PatchTargetVersion.Revision == -1)
+                //{
+                //    if (RepoVersion.Major != PatchTargetVersion.Major || RepoVersion.Minor != PatchTargetVersion.Minor)
+                //    {
+                //        result.AddError(String.Format("Repo version, {0}, does match patch target version, {1}.", RepoVersion.ToString(), PatchTargetVersion.ToString()));
+                //        // no further validation may be done. Bail...
+                //        return result;
+                //    }
+                //    else
+                //    {
+                //        PatchTargetVersion = RepoVersion;
+                //    }
+                //}
 
                 _sourceAssemblies = GetSourceAssmeblies();
                 // assembly exists?                
@@ -159,9 +211,9 @@ namespace GitHubCE.Advantage
                                                                                  versInfo.FileBuildPart, versInfo.FilePrivatePart);
 
                         Console.WriteLine("{0}: File Version:{1}; Product Version:{2}; myVers:{3}; IsDebug:{4}", assemblyFileName.FullName, fileVersion, productVersion, myVers, versInfo.IsDebug);
-                        if (PatchTargetVersion.ToString() != fileVersion)
+                        if (RepoVersion.ToString() != fileVersion)
                         {
-                            result.AddError(String.Format("Built assembly {0} is at version {1}, patching to version {2}.", assemblyFileName, fileVersion, PatchTargetVersion.ToString()));
+                            result.AddError(String.Format("Built assembly {0} is at version {1}, patching to version {2}.", assemblyFileName, fileVersion, RepoVersion.ToString()));
                         }
 
                         // built since request made?
@@ -202,7 +254,7 @@ namespace GitHubCE.Advantage
                         if (!Directory.Exists(AssemblyBackupFolder))
                         {
                             var backupInfo = Directory.CreateDirectory(AssemblyBackupFolder);
-                            if (null==backupInfo)
+                            if (null == backupInfo)
                             {
                                 result.AddError(String.Format("Error creating backup directory {0}.", AssemblyBackupFolder));
                             }

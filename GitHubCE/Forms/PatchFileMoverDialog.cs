@@ -15,8 +15,13 @@ namespace GitHubCE.Forms
 {
     public partial class PatchFileMoverDialog : Form
     {
-        PatchHelper PatchHelper { get; set; }
+        #region fields
         bool _passedValidation = false;
+        #endregion
+
+        #region properties
+        PatchHelper PatchHelper { get; set; }
+        #endregion
 
         #region ctor / load
         public PatchFileMoverDialog()

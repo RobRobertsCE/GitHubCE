@@ -358,6 +358,42 @@ namespace GitHubCE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 4.
+        /// </summary>
+        internal static string SprintCountPerVersion {
+            get {
+                return ResourceManager.GetString("SprintCountPerVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 14.
+        /// </summary>
+        internal static string SprintLengthDays {
+            get {
+                return ResourceManager.GetString("SprintLengthDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 2/23/2016.
+        /// </summary>
+        internal static string StartDate {
+            get {
+                return ResourceManager.GetString("StartDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 16.3.
+        /// </summary>
+        internal static string StartVersion {
+            get {
+                return ResourceManager.GetString("StartVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap startwithoutdebugging_6556 {

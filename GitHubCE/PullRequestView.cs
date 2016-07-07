@@ -12,6 +12,7 @@ namespace GitHubCE
         public int Id { get; set; }
         public DateTimeOffset Created { get; set; }
         public DateTimeOffset Updated { get; set; }
+        public RepoBranch RepoBranch { get; set; }
         public string RepoName { get; set; }
         public string Title { get; set; }
         public bool HasBuildScriptChange { get; set; }
@@ -107,6 +108,31 @@ namespace GitHubCE
             get
             {                
                 return String.Join(", ", JiraIssueKeys);
+            }
+        }
+
+        public string FixVersions
+        {
+            get
+            {
+                return String.Join(", ", JiraIssues[0].FixVersions.Select(v=>v.ToString()).ToList());
+            }
+        }
+
+        public bool VersionIsValid
+        {
+            get
+            {
+                if (JiraIssues[0].FixVersions.Count==0)
+                {
+                    return false;
+                }
+                else
+                {
+                    var versionBuffer = JiraIssues[0].FixVersions[0].ToString().Replace("-patch","");
+                    Version fixVersion = new Version(versionBuffer);
+                    return (Version == fixVersion);
+                }
             }
         }
 

@@ -36,14 +36,14 @@ namespace GitHubCE.Logic
             }
         }
 
-        protected string UpgradeProjectFolder
+        public string UpgradeProjectFolder
         {
             get
             {
                 return String.Format(@"C:\Users\{0}\Source\Repos\{1}\src\AdvUpgrade\AdvUpgrade\", WinUserName, RepoName);
             }
         }
-        protected string UpgradeProjectVbProjectFile
+        public string UpgradeProjectVbProjectFile
         {
             get
             {
@@ -494,6 +494,8 @@ namespace GitHubCE.Logic
                 //<EmbeddedResource Include="16.4\16.4.100\NotifyEventTypes.16.4.100.sql" />
                 // To
                 //<EmbeddedResource Include="16.4\16.4.6\NotifyEventTypes.16.4.6.sql" />
+
+
 
             }
             catch (Exception ex)

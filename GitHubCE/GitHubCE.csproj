@@ -75,7 +75,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Advantage\BranchVersionHelper.cs" />
     <Compile Include="Advantage\PatchHelper.cs" />
+    <Compile Include="Advantage\VersionExtensions.cs" />
     <Compile Include="Forms\DbVersionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -178,6 +180,10 @@
     <None Include="Resources\openHS.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ReferenceMapper\ReferenceMapper\ReferenceMapper\BuildReferenceMapper.csproj">
+      <Project>{1282d7eb-7b4c-467e-b5cc-aa00469e8a9c}</Project>
+      <Name>BuildReferenceMapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj">
       <Project>{438eb0cf-d781-4f1b-9bd3-b33638aa8d1d}</Project>
       <Name>Atlassian.Jira</Name>
@@ -193,6 +199,10 @@
     <ProjectReference Include="..\JiraCE\JiraCE.csproj">
       <Project>{35926f48-0f62-4268-a93a-0f8cd5c914a0}</Project>
       <Name>JiraCE</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PfsConnectMonitor\PfsConnectMonitor.vbproj">
+      <Project>{86e1dce3-1931-42af-a2d4-7a617c95f877}</Project>
+      <Name>PfsConnectMonitor</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

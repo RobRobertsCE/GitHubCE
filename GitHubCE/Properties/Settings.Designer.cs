@@ -169,5 +169,29 @@ namespace GitHubCE.Properties {
                 this["ShowClosedRequests"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowAMSTeam {
+            get {
+                return ((bool)(this["ShowAMSTeam"]));
+            }
+            set {
+                this["ShowAMSTeam"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowRDTeam {
+            get {
+                return ((bool)(this["ShowRDTeam"]));
+            }
+            set {
+                this["ShowRDTeam"] = value;
+            }
+        }
     }
 }

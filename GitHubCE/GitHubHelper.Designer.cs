@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GitHubHelper));
             this.lvPullRequests = new System.Windows.Forms.ListView();
+            this.chTeam = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chId = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chRepo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chUpdated = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -38,6 +39,7 @@
             this.chJiraNumber = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chBranch = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chVersion = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chFixVersion = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chDbUpgrade = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chDeveloper = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -86,6 +88,9 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblLastUpdate = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblBranchName = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblCurrentVersion = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblFileVersion = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblWarning = new System.Windows.Forms.ToolStripStatusLabel();
             this.notNewRequest = new System.Windows.Forms.NotifyIcon(this.components);
             this.notifyContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -100,13 +105,21 @@
             this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showOpenRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showClosedRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showAMSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showRDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateCurrentBranchToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.patchHelperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.buildRepoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dllsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.executablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dbVersionHelperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
+            this.buildFileReferenceMapperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.commitMessageBuilderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.buildToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dllsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.executablesToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsbAdvantage = new System.Windows.Forms.ToolStripButton();
@@ -126,13 +139,15 @@
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbPull = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.cboCommand = new System.Windows.Forms.ToolStripComboBox();
             this.tsbRunCommand = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.cmbBranches = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.splitter3 = new System.Windows.Forms.Splitter();
             this.scriptOutputDisplay1 = new CEScriptRunner.Views.ScriptOutputDisplay();
-            this.cboCommand = new System.Windows.Forms.ToolStripComboBox();
+            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
+            this.pFSConnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxListView.SuspendLayout();
             this.pnlTop.SuspendLayout();
             this.pnlAutoProcessSteps.SuspendLayout();
@@ -156,6 +171,7 @@
             // 
             this.lvPullRequests.BackColor = System.Drawing.SystemColors.Info;
             this.lvPullRequests.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.chTeam,
             this.chId,
             this.chRepo,
             this.chUpdated,
@@ -163,6 +179,7 @@
             this.chJiraNumber,
             this.chBranch,
             this.chVersion,
+            this.chFixVersion,
             this.chDbUpgrade,
             this.chState,
             this.chDeveloper,
@@ -182,6 +199,11 @@
             this.lvPullRequests.SelectedIndexChanged += new System.EventHandler(this.lvPullRequests_SelectedIndexChanged);
             this.lvPullRequests.DoubleClick += new System.EventHandler(this.lvPullRequests_DoubleClick);
             // 
+            // chTeam
+            // 
+            this.chTeam.Text = "Team";
+            this.chTeam.Width = 40;
+            // 
             // chId
             // 
             this.chId.Text = "Id";
@@ -199,7 +221,7 @@
             // chTitle
             // 
             this.chTitle.Text = "Title";
-            this.chTitle.Width = 292;
+            this.chTitle.Width = 225;
             // 
             // chJiraNumber
             // 
@@ -214,7 +236,12 @@
             // chVersion
             // 
             this.chVersion.Text = "Version";
-            this.chVersion.Width = 75;
+            this.chVersion.Width = 50;
+            // 
+            // chFixVersion
+            // 
+            this.chFixVersion.Text = "Fix Version";
+            this.chFixVersion.Width = 100;
             // 
             // chDbUpgrade
             // 
@@ -630,6 +657,9 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblLastUpdate,
+            this.lblBranchName,
+            this.lblCurrentVersion,
+            this.lblFileVersion,
             this.lblWarning});
             this.statusStrip1.Location = new System.Drawing.Point(0, 604);
             this.statusStrip1.Name = "statusStrip1";
@@ -645,13 +675,30 @@
             this.lblLastUpdate.Text = "Last Update: -";
             this.lblLastUpdate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // lblBranchName
+            // 
+            this.lblBranchName.Name = "lblBranchName";
+            this.lblBranchName.Size = new System.Drawing.Size(52, 17);
+            this.lblBranchName.Text = "[Branch]";
+            // 
+            // lblCurrentVersion
+            // 
+            this.lblCurrentVersion.Name = "lblCurrentVersion";
+            this.lblCurrentVersion.Size = new System.Drawing.Size(54, 17);
+            this.lblCurrentVersion.Text = "[Version]";
+            // 
+            // lblFileVersion
+            // 
+            this.lblFileVersion.Name = "lblFileVersion";
+            this.lblFileVersion.Size = new System.Drawing.Size(72, 17);
+            this.lblFileVersion.Text = "[FileVersion]";
+            // 
             // lblWarning
             // 
-            this.lblWarning.AutoSize = false;
             this.lblWarning.BackColor = System.Drawing.SystemColors.Control;
             this.lblWarning.ForeColor = System.Drawing.Color.White;
             this.lblWarning.Name = "lblWarning";
-            this.lblWarning.Size = new System.Drawing.Size(1090, 17);
+            this.lblWarning.Size = new System.Drawing.Size(912, 17);
             this.lblWarning.Spring = true;
             // 
             // notNewRequest
@@ -706,7 +753,9 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.filterToolStripMenuItem,
-            this.toolsToolStripMenuItem});
+            this.viewToolStripMenuItem,
+            this.toolsToolStripMenuItem,
+            this.buildToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1305, 24);
@@ -738,7 +787,9 @@
             // 
             this.filterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.showOpenRequestsToolStripMenuItem,
-            this.showClosedRequestsToolStripMenuItem});
+            this.showClosedRequestsToolStripMenuItem,
+            this.showAMSToolStripMenuItem,
+            this.showRDToolStripMenuItem});
             this.filterToolStripMenuItem.Name = "filterToolStripMenuItem";
             this.filterToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.filterToolStripMenuItem.Text = "Filter";
@@ -759,13 +810,53 @@
             this.showClosedRequestsToolStripMenuItem.Text = "Show Closed Requests";
             this.showClosedRequestsToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showClosedRequestsToolStripMenuItem_CheckedChanged);
             // 
+            // showAMSToolStripMenuItem
+            // 
+            this.showAMSToolStripMenuItem.Checked = true;
+            this.showAMSToolStripMenuItem.CheckOnClick = true;
+            this.showAMSToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showAMSToolStripMenuItem.Name = "showAMSToolStripMenuItem";
+            this.showAMSToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.showAMSToolStripMenuItem.Text = "Show AMS";
+            this.showAMSToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showAMSToolStripMenuItem_CheckedChanged);
+            // 
+            // showRDToolStripMenuItem
+            // 
+            this.showRDToolStripMenuItem.Checked = true;
+            this.showRDToolStripMenuItem.CheckOnClick = true;
+            this.showRDToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showRDToolStripMenuItem.Name = "showRDToolStripMenuItem";
+            this.showRDToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.showRDToolStripMenuItem.Text = "Show R && D";
+            this.showRDToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showRDToolStripMenuItem_CheckedChanged);
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.updateCurrentBranchToolStripMenuItem1});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "&View";
+            // 
+            // updateCurrentBranchToolStripMenuItem1
+            // 
+            this.updateCurrentBranchToolStripMenuItem1.Name = "updateCurrentBranchToolStripMenuItem1";
+            this.updateCurrentBranchToolStripMenuItem1.Size = new System.Drawing.Size(195, 22);
+            this.updateCurrentBranchToolStripMenuItem1.Text = "Update Current Branch";
+            this.updateCurrentBranchToolStripMenuItem1.Click += new System.EventHandler(this.updateCurrentBranchToolStripMenuItem1_Click);
+            // 
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.optionsToolStripMenuItem,
             this.patchHelperToolStripMenuItem,
-            this.buildRepoToolStripMenuItem,
-            this.dbVersionHelperToolStripMenuItem});
+            this.dbVersionHelperToolStripMenuItem,
+            this.toolStripMenuItem4,
+            this.buildFileReferenceMapperToolStripMenuItem,
+            this.toolStripMenuItem5,
+            this.commitMessageBuilderToolStripMenuItem,
+            this.toolStripMenuItem6,
+            this.pFSConnectToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -773,46 +864,70 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
             this.optionsToolStripMenuItem.Text = "&Options";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
             // patchHelperToolStripMenuItem
             // 
             this.patchHelperToolStripMenuItem.Name = "patchHelperToolStripMenuItem";
-            this.patchHelperToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.patchHelperToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
             this.patchHelperToolStripMenuItem.Text = "Patch File Mover";
             this.patchHelperToolStripMenuItem.Click += new System.EventHandler(this.patchHelperToolStripMenuItem_Click);
-            // 
-            // buildRepoToolStripMenuItem
-            // 
-            this.buildRepoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dllsToolStripMenuItem,
-            this.executablesToolStripMenuItem});
-            this.buildRepoToolStripMenuItem.Name = "buildRepoToolStripMenuItem";
-            this.buildRepoToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.buildRepoToolStripMenuItem.Text = "Build Repo";
-            // 
-            // dllsToolStripMenuItem
-            // 
-            this.dllsToolStripMenuItem.Name = "dllsToolStripMenuItem";
-            this.dllsToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
-            this.dllsToolStripMenuItem.Text = "Dll\'s";
-            this.dllsToolStripMenuItem.Click += new System.EventHandler(this.dllsToolStripMenuItem_Click);
-            // 
-            // executablesToolStripMenuItem
-            // 
-            this.executablesToolStripMenuItem.Name = "executablesToolStripMenuItem";
-            this.executablesToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
-            this.executablesToolStripMenuItem.Text = "Executables";
-            this.executablesToolStripMenuItem.Click += new System.EventHandler(this.executablesToolStripMenuItem_Click);
             // 
             // dbVersionHelperToolStripMenuItem
             // 
             this.dbVersionHelperToolStripMenuItem.Name = "dbVersionHelperToolStripMenuItem";
-            this.dbVersionHelperToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.dbVersionHelperToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
             this.dbVersionHelperToolStripMenuItem.Text = "DbVersion Helper";
             this.dbVersionHelperToolStripMenuItem.Click += new System.EventHandler(this.dbVersionHelperToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(218, 6);
+            // 
+            // buildFileReferenceMapperToolStripMenuItem
+            // 
+            this.buildFileReferenceMapperToolStripMenuItem.Name = "buildFileReferenceMapperToolStripMenuItem";
+            this.buildFileReferenceMapperToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.buildFileReferenceMapperToolStripMenuItem.Text = "Build File Reference Mapper";
+            this.buildFileReferenceMapperToolStripMenuItem.Click += new System.EventHandler(this.buildFileReferenceMapperToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(218, 6);
+            // 
+            // commitMessageBuilderToolStripMenuItem
+            // 
+            this.commitMessageBuilderToolStripMenuItem.Name = "commitMessageBuilderToolStripMenuItem";
+            this.commitMessageBuilderToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.commitMessageBuilderToolStripMenuItem.Text = "Commit Message Builder";
+            this.commitMessageBuilderToolStripMenuItem.Click += new System.EventHandler(this.commitMessageBuilderToolStripMenuItem_Click);
+            // 
+            // buildToolStripMenuItem
+            // 
+            this.buildToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dllsToolStripMenuItem1,
+            this.executablesToolStripMenuItem1});
+            this.buildToolStripMenuItem.Name = "buildToolStripMenuItem";
+            this.buildToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
+            this.buildToolStripMenuItem.Text = "&Build";
+            // 
+            // dllsToolStripMenuItem1
+            // 
+            this.dllsToolStripMenuItem1.Name = "dllsToolStripMenuItem1";
+            this.dllsToolStripMenuItem1.Size = new System.Drawing.Size(135, 22);
+            this.dllsToolStripMenuItem1.Text = "Dll\'s";
+            this.dllsToolStripMenuItem1.Click += new System.EventHandler(this.dllsToolStripMenuItem1_Click);
+            // 
+            // executablesToolStripMenuItem1
+            // 
+            this.executablesToolStripMenuItem1.Name = "executablesToolStripMenuItem1";
+            this.executablesToolStripMenuItem1.Size = new System.Drawing.Size(135, 22);
+            this.executablesToolStripMenuItem1.Text = "Executables";
+            this.executablesToolStripMenuItem1.Click += new System.EventHandler(this.executablesToolStripMenuItem1_Click);
             // 
             // toolStripContainer1
             // 
@@ -928,7 +1043,7 @@
             this.toolStripButton1});
             this.tlsSearchToolStrip.Location = new System.Drawing.Point(3, 50);
             this.tlsSearchToolStrip.Name = "tlsSearchToolStrip";
-            this.tlsSearchToolStrip.Size = new System.Drawing.Size(1261, 25);
+            this.tlsSearchToolStrip.Size = new System.Drawing.Size(1230, 25);
             this.tlsSearchToolStrip.TabIndex = 7;
             // 
             // toolStripLabel2
@@ -994,6 +1109,13 @@
             this.toolStripSeparator8.Name = "toolStripSeparator8";
             this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
             // 
+            // cboCommand
+            // 
+            this.cboCommand.AutoSize = false;
+            this.cboCommand.Name = "cboCommand";
+            this.cboCommand.Size = new System.Drawing.Size(250, 23);
+            this.cboCommand.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtCommand_KeyUp);
+            // 
             // tsbRunCommand
             // 
             this.tsbRunCommand.Image = global::GitHubCE.Properties.Resources.startwithoutdebugging_6556;
@@ -1046,14 +1168,20 @@
             this.scriptOutputDisplay1.Prompt = null;
             this.scriptOutputDisplay1.PromptFont = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
             this.scriptOutputDisplay1.Size = new System.Drawing.Size(1305, 201);
+            this.scriptOutputDisplay1.SuppressBlankLines = false;
             this.scriptOutputDisplay1.TabIndex = 10;
             // 
-            // cboCommand
+            // toolStripMenuItem6
             // 
-            this.cboCommand.AutoSize = false;
-            this.cboCommand.Name = "cboCommand";
-            this.cboCommand.Size = new System.Drawing.Size(250, 25);
-            this.cboCommand.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtCommand_KeyUp);
+            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(218, 6);
+            // 
+            // pFSConnectToolStripMenuItem
+            // 
+            this.pFSConnectToolStripMenuItem.Name = "pFSConnectToolStripMenuItem";
+            this.pFSConnectToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.pFSConnectToolStripMenuItem.Text = "PFSConnect";
+            this.pFSConnectToolStripMenuItem.Click += new System.EventHandler(this.pFSConnectToolStripMenuItem_Click);
             // 
             // GitHubHelper
             // 
@@ -1185,9 +1313,6 @@
         private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem copyAllToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem buildRepoToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem dllsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem executablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem patchFileMoverToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dbVersionHelperToolStripMenuItem;
         private System.Windows.Forms.ToolStrip tlsSearchToolStrip;
@@ -1206,6 +1331,24 @@
         private System.Windows.Forms.ToolStripComboBox cmbBranches;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripComboBox cboCommand;
+        private System.Windows.Forms.ToolStripStatusLabel lblBranchName;
+        private System.Windows.Forms.ToolStripStatusLabel lblFileVersion;
+        private System.Windows.Forms.ToolStripStatusLabel lblCurrentVersion;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem buildFileReferenceMapperToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateCurrentBranchToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem buildToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dllsToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem executablesToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripMenuItem commitMessageBuilderToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader chTeam;
+        private System.Windows.Forms.ToolStripMenuItem showAMSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showRDToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader chFixVersion;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
+        private System.Windows.Forms.ToolStripMenuItem pFSConnectToolStripMenuItem;
     }
 }
 
