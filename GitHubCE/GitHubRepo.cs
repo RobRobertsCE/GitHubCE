@@ -164,6 +164,10 @@ namespace GitHubCE
                         {
                             pullRequest = await GetPullRequestDetails(request, pullRequest);
                         }
+                        if (pullRequest.JiraIssues.Count == 0)
+                        {
+                            pullRequest = await GetPullRequestDetails(request, pullRequest);
+                        }
                     }
                 }
 
@@ -213,6 +217,10 @@ namespace GitHubCE
                     {
                         existingRequestIds.Remove(request.Number);
                         if (pullRequest.Updated != request.UpdatedAt.GetValueOrDefault())
+                        {
+                            pullRequest = await GetPullRequestDetails(request, pullRequest);
+                        }
+                        if (pullRequest.JiraIssues.Count == 0)
                         {
                             pullRequest = await GetPullRequestDetails(request, pullRequest);
                         }
