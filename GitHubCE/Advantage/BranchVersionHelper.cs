@@ -96,6 +96,8 @@ namespace GitHubCE
 
             var majorVersionNumber = Int32.Parse(versionStartDate.Year.ToString().Substring(2, 2));
             var minorVersionNumber = startVer.Minor + minorVesionsSinceStart;
+            // only 6 minor versions per year.. hardening spring throws it off.
+            if (minorVersionNumber == 7) minorVersionNumber = 6;
 
             var version = new Version(majorVersionNumber, minorVersionNumber);
 
@@ -168,100 +170,6 @@ namespace GitHubCE
             Branches.Add(DevelopBranch);
         }
 
-        //public Version GetVersion(BranchTitle branch)
-        //{
-        //    switch (branch)
-        //    {
-        //        case BranchTitle.master:
-        //            {
-        //                return Master;
-        //            }
-        //        case BranchTitle.alpha:
-        //            {
-        //                return Alpha;
-        //            }
-        //        case BranchTitle.develop:
-        //            {
-        //                return Develop;
-        //            }
-        //        default:
-        //            {
-        //                throw new ArgumentException("branch");
-        //            }
-        //    }
-        //}
-
-        //public Version GetVersion(string branchName)
-        //{
-        //    BranchTitle branch = BranchTitle.none;
-        //    if (!Enum.TryParse(branchName, out branch))
-        //    {
-        //        for (int i = 0; i < BranchNames.Count(); i++)
-        //        {
-        //            var name = BranchNames[i];
-        //            if (name.ToUpper() == branchName.ToUpper())
-        //            {
-        //                branch = (BranchTitle)i;
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    if (branch == BranchTitle.none)
-        //    {
-        //        return new Version(0, 0);
-        //    }
-
-        //    switch (branch)
-        //    {
-        //        case BranchTitle.master:
-        //            {
-        //                return Master;
-        //            }
-        //        case BranchTitle.alpha:
-        //            {
-        //                return Alpha;
-        //            }
-        //        case BranchTitle.develop:
-        //            {
-        //                return Develop;
-        //            }
-        //        default:
-        //            {
-        //                throw new ArgumentException("branch");
-        //            }
-        //    }
-        //}
-
-        //public string GetBranchName(BranchTitle branch)
-        //{
-        //    return BranchNames[(int)branch];
-        //}
-
-        //public Version GetBranch(Version version)
-        //{
-        //    if (version.Major == Master.Major && version.Minor == Master.Minor)
-        //        return Master;
-        //    else if (version.Major == Alpha.Major && version.Minor == Alpha.Minor)
-        //        return Alpha;
-        //    else if (version.Major == Develop.Major && version.Minor == Develop.Minor)
-        //        return Develop;
-        //    else
-        //        return null;
-        //}
-
-        //public BranchTitle GetBranchTitle(Version version)
-        //{
-        //    if (version.Major == Master.Major && version.Minor == Master.Minor)
-        //        return BranchTitle.master;
-        //    else if (version.Major == Alpha.Major && version.Minor == Alpha.Minor)
-        //        return BranchTitle.alpha;
-        //    else if (version.Major == Develop.Major && version.Minor == Develop.Minor)
-        //        return BranchTitle.develop;
-        //    else
-        //        return BranchTitle.none;
-        //}
-
         public RepoBranch GetRepoBranch(Version version)
         {
             return Branches.FirstOrDefault(b => b.Version.Major == version.Major && b.Version.Minor == version.Minor);
@@ -272,7 +180,35 @@ namespace GitHubCE
         }
         public RepoBranch GetRepoBranch(string branchName)
         {
-            return Branches.FirstOrDefault(b => b.Name == branchName);
+            var branchBuffer = Branches.FirstOrDefault(b => b.Name == branchName);
+            if (null== branchBuffer)
+            {
+                var branchNameSections = branchName.Split('-');
+                if (branchNameSections[0].ToUpper()=="EPIC")
+                {
+                    branchBuffer = GetEpicRepoBranch(branchNameSections);
+                }
+                else
+                {
+                    var branchVersionSections = branchNameSections[1].Split('.');
+                    var branchVersion = new Version(Convert.ToInt32(branchVersionSections[0]), Convert.ToInt32(branchVersionSections[1]));
+                    branchBuffer = GetRepoBranch(branchVersion);
+                }             
+            }
+            return branchBuffer;
+        }
+
+        public RepoBranch GetEpicRepoBranch(string[] branchNameSections)
+        {
+            RepoBranch branchBuffer = null;
+            if (branchNameSections[0].ToUpper() == "EPIC")
+            {
+                if (branchNameSections[1].ToUpper() == "ADVANTAGE") // created from the develop branch
+                {
+                    branchBuffer = GetRepoBranch(BranchTitle.develop);
+                }
+            }
+            return branchBuffer;
         }
     }
 

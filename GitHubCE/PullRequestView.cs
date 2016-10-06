@@ -106,7 +106,7 @@ namespace GitHubCE
         public string JiraIssueKeyList
         {
             get
-            {                
+            {
                 return String.Join(", ", JiraIssueKeys);
             }
         }
@@ -115,7 +115,7 @@ namespace GitHubCE
         {
             get
             {
-                return String.Join(", ", JiraIssues[0].FixVersions.Select(v=>v.ToString()).ToList());
+                return String.Join(", ", JiraIssues[0].FixVersions.Select(v => v.ToString()).ToList());
             }
         }
 
@@ -123,13 +123,14 @@ namespace GitHubCE
         {
             get
             {
-                if (JiraIssues[0].FixVersions.Count==0)
+                if (JiraIssues[0].FixVersions.Count == 0)
                 {
                     return false;
                 }
                 else
                 {
-                    var versionBuffer = JiraIssues[0].FixVersions[0].ToString().Replace("-patch","");
+                    var versionBuffer = JiraIssues[0].FixVersions[0].ToString().Replace("-patch", "");
+                    versionBuffer = JiraIssues[0].FixVersions[0].ToString().Replace(" Patch", "");
                     Version fixVersion = new Version(versionBuffer);
                     return (Version == fixVersion);
                 }

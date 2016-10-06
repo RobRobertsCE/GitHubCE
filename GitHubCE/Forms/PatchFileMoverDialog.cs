@@ -54,17 +54,22 @@ namespace GitHubCE.Forms
             lvSource.Groups.Add(new ListViewGroup(groupName, HorizontalAlignment.Left));
             foreach (var sourceFile in PatchHelper.SourceAssemblies)
             {
-                var versionInfo = FileVersionInfo.GetVersionInfo(sourceFile.FullName);
-                var sourceFileInfo = new FileInfo(sourceFile.FullName);
-                var lvi = new ListViewItem(new[] { sourceFile.Name, versionInfo.FileVersion, sourceFileInfo.LastWriteTime.ToString() });
-                lvi.Group = lvSource.Groups[0];
-                lvi.ImageIndex = 7;
-                lvSource.Items.Add(lvi);
+                if (!sourceFile.Name.Contains("TestApp") && (sourceFile.Name.Trim() != "QueryMetadataEditor.exe"))
+                {
+                    var versionInfo = FileVersionInfo.GetVersionInfo(sourceFile.FullName);
+                    var sourceFileInfo = new FileInfo(sourceFile.FullName);
+                    var lvi =
+                        new ListViewItem(new[]
+                        {sourceFile.Name, versionInfo.FileVersion, sourceFileInfo.LastWriteTime.ToString()});
+                    lvi.Group = lvSource.Groups[0];
+                    lvi.ImageIndex = 7;
+                    lvSource.Items.Add(lvi);
+                }
             }
         }
         void PopulateTarget()
         {
-            var filesBeingPatched = PatchHelper.SourceAssemblies.Select(s => s.Name).ToList();
+            var filesBeingPatched = PatchHelper.SourceAssemblies.Where(f=>!f.Name.Contains("TestApp") && (f.Name.Trim() != "QueryMetadataEditor.exe")).Select(s => s.Name).ToList();
 
             lvDestination.Groups.Clear();
 
@@ -166,7 +171,7 @@ namespace GitHubCE.Forms
                 foreach (var sourceFile in PatchHelper.SourceAssemblies)
                 {
                     var patchFileName = Path.Combine(PatchHelper.PatchFolder, sourceFile.Name);
-                    DisplayMessage(String.Format("***** COPYING {0} TO {1} *********",sourceFile.FullName, patchFileName));
+                    DisplayMessage(String.Format("***** COPYING {0} TO {1} *********", sourceFile.FullName, patchFileName));
                     File.Copy(sourceFile.FullName, patchFileName, true);
                 }
 

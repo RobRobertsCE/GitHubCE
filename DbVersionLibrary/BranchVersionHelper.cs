@@ -42,8 +42,7 @@ namespace DbVersionLibrary
 
             var daysSinceStart = (int)dateToCalculateVersionOn.Subtract(versionStartDate).TotalDays;
             var sprintsSinceStart = (int)(daysSinceStart / sprintLengthDays);
-
-
+            
             var minorVesionsSinceStart = 0;
             if (sprintsSinceStart > 0)
             {

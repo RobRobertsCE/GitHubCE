@@ -105,6 +105,7 @@
             this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showOpenRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showClosedRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showClosedInProgressRequestsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showAMSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showRDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -117,6 +118,8 @@
             this.buildFileReferenceMapperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.commitMessageBuilderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
+            this.pFSConnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.buildToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dllsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.executablesToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -146,8 +149,7 @@
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.splitter3 = new System.Windows.Forms.Splitter();
             this.scriptOutputDisplay1 = new CEScriptRunner.Views.ScriptOutputDisplay();
-            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
-            this.pFSConnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.jIRAQAToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxListView.SuspendLayout();
             this.pnlTop.SuspendLayout();
             this.pnlAutoProcessSteps.SuspendLayout();
@@ -267,10 +269,11 @@
             this.openJIRAIssueToolStripMenuItem,
             this.openPullRequestToolStripMenuItem,
             this.patchFileMoverToolStripMenuItem,
+            this.jIRAQAToolStripMenuItem,
             this.toolStripMenuItem2,
             this.cancelToolStripMenuItem});
             this.ctxListView.Name = "ctxListView";
-            this.ctxListView.Size = new System.Drawing.Size(172, 98);
+            this.ctxListView.Size = new System.Drawing.Size(172, 142);
             // 
             // openJIRAIssueToolStripMenuItem
             // 
@@ -684,13 +687,13 @@
             // lblCurrentVersion
             // 
             this.lblCurrentVersion.Name = "lblCurrentVersion";
-            this.lblCurrentVersion.Size = new System.Drawing.Size(54, 17);
+            this.lblCurrentVersion.Size = new System.Drawing.Size(53, 17);
             this.lblCurrentVersion.Text = "[Version]";
             // 
             // lblFileVersion
             // 
             this.lblFileVersion.Name = "lblFileVersion";
-            this.lblFileVersion.Size = new System.Drawing.Size(72, 17);
+            this.lblFileVersion.Size = new System.Drawing.Size(71, 17);
             this.lblFileVersion.Text = "[FileVersion]";
             // 
             // lblWarning
@@ -698,7 +701,7 @@
             this.lblWarning.BackColor = System.Drawing.SystemColors.Control;
             this.lblWarning.ForeColor = System.Drawing.Color.White;
             this.lblWarning.Name = "lblWarning";
-            this.lblWarning.Size = new System.Drawing.Size(912, 17);
+            this.lblWarning.Size = new System.Drawing.Size(914, 17);
             this.lblWarning.Spring = true;
             // 
             // notNewRequest
@@ -788,6 +791,7 @@
             this.filterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.showOpenRequestsToolStripMenuItem,
             this.showClosedRequestsToolStripMenuItem,
+            this.showClosedInProgressRequestsToolStripMenuItem,
             this.showAMSToolStripMenuItem,
             this.showRDToolStripMenuItem});
             this.filterToolStripMenuItem.Name = "filterToolStripMenuItem";
@@ -796,9 +800,11 @@
             // 
             // showOpenRequestsToolStripMenuItem
             // 
+            this.showOpenRequestsToolStripMenuItem.Checked = true;
             this.showOpenRequestsToolStripMenuItem.CheckOnClick = true;
+            this.showOpenRequestsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showOpenRequestsToolStripMenuItem.Name = "showOpenRequestsToolStripMenuItem";
-            this.showOpenRequestsToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.showOpenRequestsToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.showOpenRequestsToolStripMenuItem.Text = "Show Open Requests";
             this.showOpenRequestsToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showOpenRequestsToolStripMenuItem_CheckedChanged);
             // 
@@ -806,9 +812,19 @@
             // 
             this.showClosedRequestsToolStripMenuItem.CheckOnClick = true;
             this.showClosedRequestsToolStripMenuItem.Name = "showClosedRequestsToolStripMenuItem";
-            this.showClosedRequestsToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
-            this.showClosedRequestsToolStripMenuItem.Text = "Show Closed Requests";
+            this.showClosedRequestsToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
+            this.showClosedRequestsToolStripMenuItem.Text = "Show Closed - QA Requests";
             this.showClosedRequestsToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showClosedRequestsToolStripMenuItem_CheckedChanged);
+            // 
+            // showClosedInProgressRequestsToolStripMenuItem
+            // 
+            this.showClosedInProgressRequestsToolStripMenuItem.Checked = true;
+            this.showClosedInProgressRequestsToolStripMenuItem.CheckOnClick = true;
+            this.showClosedInProgressRequestsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showClosedInProgressRequestsToolStripMenuItem.Name = "showClosedInProgressRequestsToolStripMenuItem";
+            this.showClosedInProgressRequestsToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
+            this.showClosedInProgressRequestsToolStripMenuItem.Text = "Show Closed - In Progress Requests";
+            this.showClosedInProgressRequestsToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showClosedInProgressRequestsToolStripMenuItem_CheckedChanged);
             // 
             // showAMSToolStripMenuItem
             // 
@@ -816,7 +832,7 @@
             this.showAMSToolStripMenuItem.CheckOnClick = true;
             this.showAMSToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showAMSToolStripMenuItem.Name = "showAMSToolStripMenuItem";
-            this.showAMSToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.showAMSToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.showAMSToolStripMenuItem.Text = "Show AMS";
             this.showAMSToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showAMSToolStripMenuItem_CheckedChanged);
             // 
@@ -826,7 +842,7 @@
             this.showRDToolStripMenuItem.CheckOnClick = true;
             this.showRDToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showRDToolStripMenuItem.Name = "showRDToolStripMenuItem";
-            this.showRDToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.showRDToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.showRDToolStripMenuItem.Text = "Show R && D";
             this.showRDToolStripMenuItem.CheckedChanged += new System.EventHandler(this.showRDToolStripMenuItem_CheckedChanged);
             // 
@@ -858,7 +874,7 @@
             this.toolStripMenuItem6,
             this.pFSConnectToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
             // 
             // optionsToolStripMenuItem
@@ -905,6 +921,18 @@
             this.commitMessageBuilderToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
             this.commitMessageBuilderToolStripMenuItem.Text = "Commit Message Builder";
             this.commitMessageBuilderToolStripMenuItem.Click += new System.EventHandler(this.commitMessageBuilderToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem6
+            // 
+            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(218, 6);
+            // 
+            // pFSConnectToolStripMenuItem
+            // 
+            this.pFSConnectToolStripMenuItem.Name = "pFSConnectToolStripMenuItem";
+            this.pFSConnectToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.pFSConnectToolStripMenuItem.Text = "PFSConnect";
+            this.pFSConnectToolStripMenuItem.Click += new System.EventHandler(this.pFSConnectToolStripMenuItem_Click);
             // 
             // buildToolStripMenuItem
             // 
@@ -1171,17 +1199,12 @@
             this.scriptOutputDisplay1.SuppressBlankLines = false;
             this.scriptOutputDisplay1.TabIndex = 10;
             // 
-            // toolStripMenuItem6
+            // jIRAQAToolStripMenuItem
             // 
-            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(218, 6);
-            // 
-            // pFSConnectToolStripMenuItem
-            // 
-            this.pFSConnectToolStripMenuItem.Name = "pFSConnectToolStripMenuItem";
-            this.pFSConnectToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
-            this.pFSConnectToolStripMenuItem.Text = "PFSConnect";
-            this.pFSConnectToolStripMenuItem.Click += new System.EventHandler(this.pFSConnectToolStripMenuItem_Click);
+            this.jIRAQAToolStripMenuItem.Name = "jIRAQAToolStripMenuItem";
+            this.jIRAQAToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.jIRAQAToolStripMenuItem.Text = "JIRA -> QA";
+            this.jIRAQAToolStripMenuItem.Click += new System.EventHandler(this.jIRAQAToolStripMenuItem_Click);
             // 
             // GitHubHelper
             // 
@@ -1349,6 +1372,8 @@
         private System.Windows.Forms.ColumnHeader chFixVersion;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
         private System.Windows.Forms.ToolStripMenuItem pFSConnectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showClosedInProgressRequestsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem jIRAQAToolStripMenuItem;
     }
 }
 

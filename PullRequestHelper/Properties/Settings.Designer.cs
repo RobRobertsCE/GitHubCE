@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace GitHubCE.Properties {
+namespace PullRequestHelper.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,7 +25,7 @@ namespace GitHubCE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("eb023f6c8fd227aa65f22390cd00f0dcd9f6f1c6")]
+        [global::System.Configuration.DefaultSettingValueAttribute("5eda3f519cb0ab43f1f5febcf5d382e96f411cf1")]
         public string GitHubToken {
             get {
                 return ((string)(this["GitHubToken"]));
@@ -97,112 +97,25 @@ namespace GitHubCE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"[""Advantage"",
-""AdvantageCustomReports"",
-""AdvantageWeb"",
-""AdvantageCreditCards"",
-""AdvantageShared"",
-""AdvantageDiscountBase"",
-""AdvantageRelay"",
-""AdvantageWebAdmin"",
-""AdvantageSales"",
-""AdvantageTaxes"",
-""CenterEdgeSiteInfo"",
-""AdvantageWebAdmin"",
-""advantageweb"",
-""CECloud.Webstores"",
-""CECloud.RevNu"",
-""CECloud.Script"",
-""CenterEdgeHelp"",
-""advantagecorp"",
-""CECloud.NodeJSRouter"",
-""CECloud.Authentication"",
-""CECloud.Clients"",
-""CECloud.DataLayer"",
-""CE.Log"",
-""CenterEdgeUpgrades"",
-""CECloud.MVC"",
-""WPFMediaKit""]")]
-        public string RepoList {
+        [global::System.Configuration.DefaultSettingValueAttribute("rroberts")]
+        public string TeamCityUserName {
             get {
-                return ((string)(this["RepoList"]));
+                return ((string)(this["TeamCityUserName"]));
             }
             set {
-                this["RepoList"] = value;
+                this["TeamCityUserName"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("[\"Advantage\",\"AdvantageCustomReports\",\"AdvantageWeb\",\"AdvantageCreditCards\",\"Adva" +
-            "ntageShared\",\"AdvantageDiscountBase\",\"AdvantageRelay\",\"AdvantageWebAdmin\",\"Advan" +
-            "tageSales\",\"AdvantageTaxes\", \"CenterEdgeSiteInfo\"]")]
-        public string ActiveRepoList {
+        [global::System.Configuration.DefaultSettingValueAttribute("hel-j205")]
+        public string TeamCityPassword {
             get {
-                return ((string)(this["ActiveRepoList"]));
+                return ((string)(this["TeamCityPassword"]));
             }
             set {
-                this["ActiveRepoList"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ShowOpenRequests {
-            get {
-                return ((bool)(this["ShowOpenRequests"]));
-            }
-            set {
-                this["ShowOpenRequests"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ShowClosedRequests {
-            get {
-                return ((bool)(this["ShowClosedRequests"]));
-            }
-            set {
-                this["ShowClosedRequests"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool ShowAMSTeam {
-            get {
-                return ((bool)(this["ShowAMSTeam"]));
-            }
-            set {
-                this["ShowAMSTeam"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ShowRDTeam {
-            get {
-                return ((bool)(this["ShowRDTeam"]));
-            }
-            set {
-                this["ShowRDTeam"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool ShowClosedInProgress {
-            get {
-                return ((bool)(this["ShowClosedInProgress"]));
-            }
-            set {
-                this["ShowClosedInProgress"] = value;
+                this["TeamCityPassword"] = value;
             }
         }
     }

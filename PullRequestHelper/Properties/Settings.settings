@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PullRequestHelper.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="GitHubToken" Type="System.String" Scope="User">
+      <Value Profile="(Default)">5eda3f519cb0ab43f1f5febcf5d382e96f411cf1</Value>
+    </Setting>
+    <Setting Name="GitHubUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">RobRobertsCE</Value>
+    </Setting>
+    <Setting Name="GitHubRepoOwner" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CenterEdge</Value>
+    </Setting>
+    <Setting Name="JiraUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://centeredge.atlassian.net</Value>
+    </Setting>
+    <Setting Name="JiraUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">rroberts</Value>
+    </Setting>
+    <Setting Name="JiraUserPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">hel-j205</Value>
+    </Setting>
+    <Setting Name="TeamCityUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">rroberts</Value>
+    </Setting>
+    <Setting Name="TeamCityPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">hel-j205</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

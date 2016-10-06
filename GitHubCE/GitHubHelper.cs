@@ -165,14 +165,24 @@ namespace GitHubCE
                     UpdateDisplayCallback cb = new UpdateDisplayCallback(DisplayPullRequests);
                     this.Invoke(cb, new object[] { requests });
                 }
+                var assignedTeam = "None";
 
                 foreach (var request in requests.OrderBy(r => r.Updated))
                 {
-                    if (request.JiraIssues.Count > 0)// && request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS")
+                    if (request.JiraIssues.Count > 0)
                     {
-                        if ((request.State == ItemState.Open && Settings.Default.ShowOpenRequests || request.State != ItemState.Open && Settings.Default.ShowClosedRequests) &&
-                            (((request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS" || request.Developer == "brantburnett") && showAMSToolStripMenuItem.Checked) ||
-                            (request.JiraIssues[0].CustomFields["Team"].Values[0] == "R&D" && showRDToolStripMenuItem.Checked)))
+                        // Error here when pull request uses the epic branch, such as for unit tests.
+                        if (null != request.JiraIssues[0].CustomFields["Team"])
+                            assignedTeam = request.JiraIssues[0].CustomFields["Team"].Values[0];
+
+                        if (
+                            (request.State == ItemState.Open && Settings.Default.ShowOpenRequests ||
+                            request.State != ItemState.Open && Settings.Default.ShowClosedRequests ||
+                            (request.State != ItemState.Open && request.JiraIssueStatus == "In Progress") && Settings.Default.ShowClosedInProgress) &&
+                            (((assignedTeam == "AMS") && showAMSToolStripMenuItem.Checked) ||
+                            (assignedTeam == "R&D" && showRDToolStripMenuItem.Checked) ||
+                            (assignedTeam == "None"))
+                            )
                         {
                             ListViewItem match = null;
                             foreach (ListViewItem lvi in lvPullRequests.Items)
@@ -187,12 +197,12 @@ namespace GitHubCE
                             {
                                 // add a new item.
                                 var lvi = new ListViewItem(new string[] {
-                                    request.JiraIssues[0].CustomFields["Team"].Values[0],
+                                    assignedTeam, //request.JiraIssues[0].CustomFields["Team"].Values[0],
                                     request.Id.ToString(),
                                     request.RepoName,
                                     request.Updated.ToLocalTime().ToString(),
                                     request.Title,
-                                    request.JiraIssueKeyList, // request.JiraIssueNumber,
+                                    request.JiraIssueKeyList, 
                                     request.Branch,
                                     request.Version.ToString(),
                                     request.FixVersions,
@@ -203,7 +213,7 @@ namespace GitHubCE
 
                                 lvi.UseItemStyleForSubItems = true;
 
-                                if (request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS" || request.Developer == "brantburnett")
+                                if (assignedTeam == "AMS")
                                 {
                                     // *** Formatting - AMS *** //
 
@@ -252,13 +262,13 @@ namespace GitHubCE
                             {
                                 // update existing item.
                                 match.SubItems.Clear();
-                                match.Text = request.Id.ToString();
+                                match.Text = assignedTeam;
                                 match.SubItems.AddRange(new string[] {
-                                    request.JiraIssues[0].CustomFields["Team"].Values[0],
+                                    request.Id.ToString(),
                                     request.RepoName,
                                     request.Updated.ToLocalTime().ToString(),
                                     request.Title,
-                                    request.JiraIssueKeyList, // request.JiraIssueNumber,
+                                    request.JiraIssueKeyList, 
                                     request.Branch,
                                     request.Version.ToString(),
                                     request.FixVersions,
@@ -266,7 +276,7 @@ namespace GitHubCE
                                     request.State.ToString(),
                                     request.Developer,
                                     request.JiraIssueStatus});
-                                if (request.JiraIssues[0].CustomFields["Team"].Values[0] == "AMS" || request.Developer == "brantburnett")
+                                if (assignedTeam == "AMS")
                                 {
                                     if (request.State == ItemState.Closed)
                                     {
@@ -462,7 +472,7 @@ namespace GitHubCE
                     return;
                 PullRequestView requestView = (PullRequestView)lvPullRequests.SelectedItems[0].Tag;
                 var request = (Octokit.Issue)requestView.Tag;
-                string url = GetJIRAIssueLink(requestView.RepoName, requestView.JiraIssueNumber);
+                string url = GetJIRAIssueLink(requestView.JiraIssues[0].Project, requestView.JiraIssueNumber);
                 System.Diagnostics.Process.Start(url);
             }
             catch (Exception ex)
@@ -1109,6 +1119,18 @@ namespace GitHubCE
             ReloadRequests();
         }
 
+
+        private void showClosedInProgressRequestsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_formLoading) return;
+
+            Settings.Default.ShowClosedInProgress = showClosedInProgressRequestsToolStripMenuItem.Checked;
+            Settings.Default.Save();
+            ClearRequests();
+            ClearRequestDetails();
+            ReloadRequests();
+        }
+
         private void showAMSToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             if (_formLoading) return;
@@ -1385,13 +1407,13 @@ namespace GitHubCE
         void UpdateCurrentBranch()
         {
             CurrentBranch = BranchVersionHelper.CurrentBranch;
-            if (null!= CurrentBranch)
+            if (null != CurrentBranch)
             {
                 lblBranchName.Text = CurrentBranch.Name;
                 lblCurrentVersion.Text = CurrentBranch.Version.ToString();
                 lblFileVersion.Text = BranchVersionHelper.CurrentVersion.ToString();
             }
-          else
+            else
             {
                 lblBranchName.Text = "NONE";
                 lblCurrentVersion.Text = "NOPE";
@@ -1457,6 +1479,28 @@ namespace GitHubCE
         {
             var pHandler = new PfsConnectionHandler();
             Console.WriteLine(pHandler.ToString());
+        }
+
+        private void jIRAQAToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (lvPullRequests.SelectedItems.Count > 0)
+                {
+                    PullRequestView request = (PullRequestView)lvPullRequests.SelectedItems[0].Tag;
+                    var assemblyHelper = new PullRequestAssembyHelper(request, "rroberts");
+                    var targetVersion = request.Version;
+                    
+                    var patchHelper = new PatchHelper(assemblyHelper, request.RepoBranch);
+
+                    var dialog = new PatchFileMoverDialog(patchHelper);
+                    dialog.ShowDialog(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler(ex);
+            }
         }
     }
 }

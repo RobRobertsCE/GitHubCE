@@ -96,7 +96,7 @@ namespace GitHubCE.Advantage
             get
             {
                 if (null == _sourceAssemblies)
-                    _sourceAssemblies = GetSourceAssmeblies();
+                    _sourceAssemblies = GetSourceAssemblies();
                 return _sourceAssemblies;
             }
         }
@@ -175,7 +175,7 @@ namespace GitHubCE.Advantage
                 // repo at the correct version?
                 if (!ValidatePatchVersion())
                 {
-                    result.AddError(String.Format("Repo version, {0} - {1}, does match patch target version(s), {2} - {3}.", BranchVersionHelper.CurrentBranch.Name, RepoVersion.ToString(), this.Branch.Name, PatchTargetVersion.ToString()));                          
+                    result.AddError(String.Format("Repo version, {0} - {1}, does match patch target version(s), {2} - {3}.", BranchVersionHelper.CurrentBranch.Name, RepoVersion.ToString(), this.Branch.Name, PatchTargetVersion.ToString()));
                 }
                 //if (PatchTargetVersion.Build == -1 && PatchTargetVersion.Revision == -1)
                 //{
@@ -191,7 +191,7 @@ namespace GitHubCE.Advantage
                 //    }
                 //}
 
-                _sourceAssemblies = GetSourceAssmeblies();
+                _sourceAssemblies = GetSourceAssemblies();
                 // assembly exists?                
                 foreach (var assemblyFileName in _sourceAssemblies)
                 {
@@ -269,13 +269,13 @@ namespace GitHubCE.Advantage
             return result;
         }
 
-        IList<FileInfo> GetSourceAssmeblies()
+        IList<FileInfo> GetSourceAssemblies()
         {
             var sourceFiles = new List<FileInfo>();
 
             foreach (var assemblyFileName in AssemblyHelper.AssemblyFiles)
             {
-                if (!assemblyFileName.Contains("AdvUpgrade"))
+                if (!assemblyFileName.Contains("AdvUpgrade") && !assemblyFileName.Contains("TestApp") && (assemblyFileName.Trim() != "QueryMetadataEditor.exe"))
                 {
                     var builtAssemblyFilePath = Path.Combine(BinFolder, assemblyFileName);
                     sourceFiles.Add(new FileInfo(builtAssemblyFilePath));

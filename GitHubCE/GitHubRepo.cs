@@ -136,7 +136,7 @@ namespace GitHubCE
 
                 foreach (var request in searchResults.Items)
                 {
-                    var repositoryName = request.PullRequest.HtmlUrl.Segments[2].TrimEnd('/');
+                    //var repositoryName = request.PullRequest.HtmlUrl.Segments[2].TrimEnd('/');
 
                     var pullRequest = PullRequests.FirstOrDefault(r => r.Id == request.Number);
                     if (null == pullRequest)
@@ -268,7 +268,8 @@ namespace GitHubCE
 
             pullRequest.Branch = pullRequestDetails.Base.Ref;
             pullRequest.RepoBranch = BranchVersionHelper.Map.GetRepoBranch(pullRequest.Branch);
-            pullRequest.Version = pullRequest.RepoBranch.Version;
+            if (null!= pullRequest.RepoBranch)
+                pullRequest.Version = pullRequest.RepoBranch.Version;
             pullRequest.Mergeable = pullRequestDetails.Mergeable;
             pullRequest.Merged = pullRequestDetails.Merged;
             pullRequest.ChangedFileCount = pullRequestDetails.ChangedFiles;
